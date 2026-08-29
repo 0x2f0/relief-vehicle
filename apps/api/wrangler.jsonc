@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "relief-vehicle-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "account_id": "aeff80f645343eee987fb3fef0b740ef",
+  "vars": {
+    "ENVIRONMENT": "production",
+    "CORS_ORIGIN": "*"
+  },
+}

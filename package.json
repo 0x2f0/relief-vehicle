@@ -1,0 +1,27 @@
+{
+  "name": "relief-vehicle",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "bun --filter \"*\" dev",
+    "dev:api": "bun --filter \"@relief/api\" dev",
+    "dev:web": "bun --filter \"@relief/web\" dev",
+    "build": "bun --filter \"*\" build",
+    "build:api": "bun --filter \"@relief/api\" build",
+    "build:web": "bun --filter \"@relief/web\" build",
+    "db:migrate": "bun run ./scripts/migrate.ts",
+    "db:seed": "bun run ./scripts/seed.ts",
+    "test": "bun run ./scripts/test-e2e.ts",
+    "deploy": "bash ./scripts/deploy.sh"
+  },
+  "devDependencies": {
+    "@libsql/client": "0.17.4",
+    "jose": "6.2.10",
+    "typescript": "^5.8.2",
+    "wrangler": "^4.104.0"
+  }
+}

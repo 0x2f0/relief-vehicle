@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+.env.seed
+
+# Databases & SQLite files
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+local.db
+local.db*
+
+# Build Outputs
+dist/
+build/
+.wrangler/
+.turbo/
+
+# Logs & System
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+*.local
+
+.dev.vars

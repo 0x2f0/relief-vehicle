@@ -1,0 +1,2 @@
+/api/* https://relief-vehicle-api.sarojregmi-official.workers.dev/api/:splat 200
+/* /index.html 200
