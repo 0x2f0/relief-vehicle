@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "wrangler dev --env-file ../../.env",
     "build": "wrangler deploy --dry-run",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy --local"
   },
   "dependencies": {
     "@libsql/client": "0.17.4",

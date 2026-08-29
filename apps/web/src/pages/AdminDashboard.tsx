@@ -55,7 +55,6 @@ import {
   HelpCircle,
   PauseCircle,
   Menu,
-  ChevronRight,
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
@@ -750,29 +749,28 @@ export const AdminDashboard: React.FC = () => {
   const getPriorityBadge = (priority?: Priority) => {
     if (priority === 'Critical') {
       return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-red-100 text-red-800 border border-red-200 uppercase tracking-wider">
-          <AlertTriangle className="w-3 h-3 mr-1 text-red-600 animate-pulse" />
-          P1: CRITICAL
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 uppercase tracking-wider">
+          P1
         </span>
       );
     }
     if (priority === 'High') {
       return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 uppercase">
-          P2: HIGH
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 uppercase">
+          P2
         </span>
       );
     }
     if (priority === 'Medium') {
       return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800 border border-blue-200 uppercase">
-          P3: MEDIUM
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800 uppercase">
+          P3
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-        P4: NORMAL
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">
+        P4
       </span>
     );
   };
@@ -780,24 +778,24 @@ export const AdminDashboard: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'submitted':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">दर्ता भएको (Submitted)</span>;
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-800">Submitted</span>;
       case 'under_review':
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200">समीक्षामा (Under Review)</span>;
       case 'info_requested':
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">थप विवरण माग (Info Requested)</span>;
       case 'approved':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">स्वीकृत (Approved)</span>;
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-100 text-blue-800">Approved</span>;
       case 'issued':
       case 'active':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> ई-पास जारी (Issued)</span>;
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800">Issued</span>;
       case 'held':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-200">होल्ड (Held)</span>;
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-100 text-orange-800">On Hold</span>;
       case 'rejected':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">अस्वीकृत (Rejected)</span>;
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-100 text-rose-800">Rejected</span>;
       case 'revoked':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-900 border border-red-300">खारेज (Revoked)</span>;
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-red-100 text-red-800">Revoked</span>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">{status}</span>;
+        return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600">{status}</span>;
     }
   };
 
@@ -859,10 +857,10 @@ export const AdminDashboard: React.FC = () => {
                 }`}
               >
                 {currentUser?.role === 'superadmin'
-                  ? '👑 Superuser'
+                  ? 'Superuser'
                   : currentUser?.role === 'gov_officer'
-                  ? '🏛️ Gov Officer'
-                  : '👮 Checkpoint'}
+                  ? 'Gov Officer'
+                  : 'Checkpoint'}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 truncate flex items-center space-x-1">
@@ -874,10 +872,7 @@ export const AdminDashboard: React.FC = () => {
           {/* Vertical Grouped Navigation Links */}
           <nav className="space-y-5" aria-label="Admin Sidebar Navigation">
             {/* GROUP 1: OPERATIONS & PASSES */}
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 block">
-                {t('admin.groupOperations')}
-              </span>
+            <div className="space-y-0.5">
 
               <button
                 type="button"
@@ -942,7 +937,7 @@ export const AdminDashboard: React.FC = () => {
                   <Activity className="w-4 h-4 text-rose-400" />
                   <span>{t('admin.coordination')}</span>
                 </div>
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></span>
               </button>
 
               <button
@@ -985,10 +980,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             {/* GROUP 2: INFRASTRUCTURE & STATIONS */}
-            <div className="space-y-1 pt-2 border-t border-slate-800">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 block">
-                {t('admin.groupInfrastructure')}
-              </span>
+            <div className="space-y-0.5 pt-2 border-t border-slate-800/50">
 
               <button
                 type="button"
@@ -1036,10 +1028,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             {/* GROUP 3: SECURITY & AUDIT */}
-            <div className="space-y-1 pt-2 border-t border-slate-800">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 block">
-                {t('admin.groupSecurity')}
-              </span>
+            <div className="space-y-0.5 pt-2 border-t border-slate-800/50">
 
               {isSuperAdmin && (
                 <button
@@ -1152,10 +1141,8 @@ export const AdminDashboard: React.FC = () => {
               <Menu className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center space-x-2 text-xs">
-              <span className="font-semibold text-slate-500 hidden sm:inline">{t('admin.dashboard')}</span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400 hidden sm:inline" />
-              <span className="font-bold text-[#0447AF] capitalize">
+            <div className="flex items-center text-xs">
+              <span className="font-semibold text-[#0447AF] capitalize">
                 {activeTab === 'overview'
                   ? t('admin.overview')
                   : activeTab === 'all_passes'
@@ -1210,10 +1197,10 @@ export const AdminDashboard: React.FC = () => {
                     <AlertOctagon className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <h3 className="text-sm font-bold text-red-900">
-                        अत्यावश्यक राहत तथा उद्धार क्लियरेन्स अनुरोध ({criticalOnlyCount} Critical Missions Pending)
+                        {criticalOnlyCount} Critical mission{criticalOnlyCount !== 1 ? 's' : ''} pending immediate clearance
                       </h3>
                       <p className="text-xs text-red-700 mt-0.5">
-                        जीवन रक्षा, एम्बुलेन्स तथा विपद् उद्धार टोलीका आवेदनहरूलाई तत्काल समीक्षा गरी द्रुत पास जारी गर्नुहोस्।
+                        Life-saving missions require priority review. Issue passes without delay.
                       </p>
                     </div>
                   </div>
@@ -1223,9 +1210,9 @@ export const AdminDashboard: React.FC = () => {
                       setStatusFilter('critical');
                       setActiveTab('all_passes');
                     }}
-                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold whitespace-nowrap shadow-xs"
+                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold whitespace-nowrap"
                   >
-                    समीक्षा गर्नुहोस्
+                    Review now
                   </button>
                 </div>
               )}
@@ -1242,7 +1229,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
                     <span className="text-3xl font-black text-slate-900 tabular-nums block">{totalAppsCount}</span>
-                    <span className="text-[10px] text-slate-400 font-medium block">कुल राहत तथा उद्धार दर्ता</span>
+                    <span className="text-[10px] text-slate-400 block">Total applications</span>
                   </div>
                 </div>
 
@@ -1256,7 +1243,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
                     <span className="text-3xl font-black text-red-600 tabular-nums block">{urgentCount}</span>
-                    <span className="text-[10px] text-red-500 font-medium block">P1 Critical / P2 High</span>
+                    <span className="text-[10px] text-red-400 block">Critical &amp; High</span>
                   </div>
                 </div>
 
@@ -1270,7 +1257,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
                     <span className="text-3xl font-black text-emerald-700 tabular-nums block">{activePassesCount}</span>
-                    <span className="text-[10px] text-emerald-600 font-medium block">जारी तथा स्वीकृत ई-पास</span>
+                    <span className="text-[10px] text-emerald-600 block">Issued &amp; approved</span>
                   </div>
                 </div>
 
@@ -1284,7 +1271,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
                     <span className="text-3xl font-black text-amber-700 tabular-nums block">{pendingCount}</span>
-                    <span className="text-[10px] text-amber-600 font-medium block">प्रतीक्षारत समीक्षा</span>
+                    <span className="text-[10px] text-amber-600 block">Awaiting review</span>
                   </div>
                 </div>
               </div>
@@ -1297,15 +1284,15 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <FileText className="w-4 h-4 text-[#0447AF]" />
                       <h3 className="font-bold text-sm text-slate-900">
-                        ताजा दर्ता आवेदनहरू (Recent Review Queue)
+                        Recent Review Queue
                       </h3>
                     </div>
                     <button
                       type="button"
                       onClick={() => setActiveTab('all_passes')}
-                      className="text-xs text-[#0447AF] font-bold hover:underline"
+                      className="text-xs text-[#0447AF] font-medium hover:underline"
                     >
-                      सबै हेर्नुहोस् ({applications.length}) →
+                      View all ({applications.length})
                     </button>
                   </div>
 
@@ -1320,7 +1307,7 @@ export const AdminDashboard: React.FC = () => {
                           </div>
                           <p className="font-bold text-slate-900">{app.org_name || app.applicant_name}</p>
                           <p className="text-slate-500 text-[11px]">
-                            {app.vehicle_number} • {app.departure_location} ➡️ {app.destination}
+                            {app.vehicle_number} · {app.departure_location} → {app.destination}
                           </p>
                         </div>
 
@@ -1339,7 +1326,7 @@ export const AdminDashboard: React.FC = () => {
                               onClick={() => handleApprove(app)}
                               className="px-2.5 py-1 bg-[#0447AF] hover:bg-[#033685] text-white font-bold rounded-lg text-xs"
                             >
-                              स्वीकृत
+                              Approve
                             </button>
                           )}
                         </div>
@@ -1354,15 +1341,15 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <Navigation className="w-4 h-4 text-orange-500" />
                       <h3 className="font-bold text-sm text-slate-900">
-                        राजमार्ग अवरोध अनुगमन
+                        Road Hazards
                       </h3>
                     </div>
                     <button
                       type="button"
                       onClick={() => setActiveTab('road_conditions')}
-                      className="text-xs text-[#0447AF] font-bold hover:underline"
+                      className="text-xs text-[#0447AF] font-medium hover:underline"
                     >
-                      व्यवस्थापन →
+                      Manage
                     </button>
                   </div>
 
@@ -1381,13 +1368,13 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     ))}
                     {roads.length === 0 && (
-                      <p className="text-slate-400 text-xs text-center py-4">सबै करिडोर खुला छन्</p>
+                      <p className="text-slate-400 text-xs text-center py-4">All corridors open</p>
                     )}
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 flex justify-between text-xs">
-                    <span className="text-slate-500 font-medium">सक्रिय चेकपोइन्टहरू:</span>
-                    <span className="font-bold text-slate-900">{checkpoints.length} स्टेसनहरू अनलाइन</span>
+                    <span className="text-slate-500">Active checkpoints</span>
+                    <span className="font-semibold text-slate-900">{checkpoints.length} online</span>
                   </div>
                 </div>
               </div>
@@ -1437,12 +1424,12 @@ export const AdminDashboard: React.FC = () => {
                 {/* Status Tabs */}
                 <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-lg">
                   {[
-                    { key: 'all', label: 'सबै (All)' },
-                    { key: 'critical', label: '🚨 P1 Critical' },
-                    { key: 'submitted', label: 'दर्ता भएको (Submitted)' },
-                    { key: 'approved', label: 'स्वीकृत (Approved)' },
-                    { key: 'issued', label: 'ई-पास जारी (Issued)' },
-                    { key: 'rejected', label: 'अस्वीकृत (Rejected)' },
+                    { key: 'all', label: 'All' },
+                    { key: 'critical', label: 'Critical' },
+                    { key: 'submitted', label: 'Submitted' },
+                    { key: 'approved', label: 'Approved' },
+                    { key: 'issued', label: 'Issued' },
+                    { key: 'rejected', label: 'Rejected' },
                   ].map((st) => (
                     <button
                       key={st.key}
@@ -1465,7 +1452,7 @@ export const AdminDashboard: React.FC = () => {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="खोज्नुहोस् (ID, सवारी, संस्था, रुट)..."
+                      placeholder="Search by ID, vehicle, org, or route…"
                       className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:border-[#0447AF]"
                     />
                   </div>
@@ -1489,35 +1476,35 @@ export const AdminDashboard: React.FC = () => {
                 <table className="w-full text-left border-collapse" aria-label="Master Applied Passes Queue">
                   <thead>
                     <tr className="bg-[#F4F8FF] text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                      <th className="p-3.5">ID / प्राथमिकता</th>
-                      <th className="p-3.5">संस्था तथा निवेदक</th>
-                      <th className="p-3.5">सवारी तथा चालक</th>
-                      <th className="p-3.5">रुट तथा गन्तव्य</th>
-                      <th className="p-3.5">राहत सामग्री (Cargo)</th>
-                      <th className="p-3.5">स्थिति</th>
-                      <th className="p-3.5 text-right">कार्यहरू (Actions)</th>
+                      <th className="p-3 pl-4">ID</th>
+                      <th className="p-3">Organisation</th>
+                      <th className="p-3">Vehicle / Driver</th>
+                      <th className="p-3">Destination</th>
+                      <th className="p-3">Cargo</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3 pr-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-xs">
                     {filteredApps.map((app) => (
                       <tr key={app.id} className="hover:bg-blue-50/50 transition-colors cursor-pointer">
-                        <td className="p-3.5 space-y-1">
+                        <td className="p-3 pl-4 space-y-1">
                           <span className="font-mono font-bold text-[#0447AF] block">{app.id}</span>
                           {getPriorityBadge(app.priority)}
                         </td>
-                        <td className="p-3.5">
+                        <td className="p-3">
                           <span className="font-bold text-slate-900 block">{app.org_name || 'Individual Volunteer'}</span>
                           <span className="text-slate-500 text-[11px]">{app.applicant_name} ({app.applicant_phone})</span>
                         </td>
-                        <td className="p-3.5">
+                        <td className="p-3">
                           <span className="font-mono font-bold text-slate-800 block">{app.vehicle_number}</span>
                           <span className="text-slate-500 text-[11px]">{app.vehicle_type} • {app.driver_name}</span>
                         </td>
-                        <td className="p-3.5">
-                          <span className="font-semibold text-slate-800 block">➡️ {app.destination}</span>
+                        <td className="p-3">
+                          <span className="font-semibold text-slate-800 block">{app.destination}</span>
                           <span className="text-slate-500 text-[11px] truncate block max-w-xs">{app.proposed_route || 'Direct Transit Corridor'}</span>
                         </td>
-                        <td className="p-3.5">
+                        <td className="p-3">
                           <span className="font-medium text-slate-700 block">
                             {app.cargo_type || 'General Relief Supplies'}
                           </span>
@@ -1525,10 +1512,10 @@ export const AdminDashboard: React.FC = () => {
                             {app.cargo_details || app.vehicle_capacity || ''}
                           </span>
                         </td>
-                        <td className="p-3.5">
+                        <td className="p-3">
                           {getStatusBadge(app.status)}
                         </td>
-                        <td className="p-3.5 text-right space-x-1 whitespace-nowrap">
+                        <td className="p-3 pr-4 text-right space-x-1 whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => {
@@ -1548,7 +1535,7 @@ export const AdminDashboard: React.FC = () => {
                               disabled={actionLoading}
                               className="px-2.5 py-1 bg-[#0447AF] hover:bg-[#033685] text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
                             >
-                              स्वीकृत (Approve)
+                              Approve
                             </button>
                           )}
 
@@ -2023,7 +2010,7 @@ export const AdminDashboard: React.FC = () => {
                     {roads.map((r) => (
                       <tr key={r.id} className="hover:bg-slate-50/80">
                         <td className="p-3.5 font-bold text-slate-900">{r.road_name}</td>
-                        <td className="p-3.5">
+                        <td className="p-3">
                           <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                             r.status === 'open' ? 'bg-emerald-100 text-emerald-800' : r.status === 'closed' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
                           }`}>
@@ -2157,7 +2144,7 @@ export const AdminDashboard: React.FC = () => {
                         <td className="p-3.5 font-mono text-[#0447AF] font-bold">{u.id}</td>
                         <td className="p-3.5 font-mono font-semibold text-slate-800">{u.username}</td>
                         <td className="p-3.5 font-bold text-slate-900">{u.full_name || u.username}</td>
-                        <td className="p-3.5">
+                        <td className="p-3">
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                               u.role === 'superadmin'
