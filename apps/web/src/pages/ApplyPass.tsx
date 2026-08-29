@@ -120,9 +120,6 @@ export const ApplyPass = () => {
       ) {
         newErrors.destination = t('apply.errSameLocation');
       }
-      if (!formData.proposed_route.trim()) {
-        newErrors.proposed_route = t('apply.errRoute');
-      }
       if (!formData.departure_time) {
         newErrors.departure_time = t('apply.errDepartureTime');
       }
@@ -172,6 +169,7 @@ export const ApplyPass = () => {
     try {
       const payload = {
         ...formData,
+        proposed_route: formData.proposed_route || `${formData.departure_location} → ${formData.destination}`,
         vehicle_owner: formData.vehicle_owner || formData.org_name,
         emergency_contact: formData.emergency_contact || formData.applicant_phone,
       };
@@ -612,45 +610,6 @@ export const ApplyPass = () => {
                   </p>
                 )}
               </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                {t('apply.route')} <span className="text-[#CC1424]">*</span>
-              </label>
-              <div className={fieldErrors.proposed_route ? 'ring-1 ring-red-400 rounded-lg' : ''}>
-                <LocationCombobox
-                  required
-                  name="proposed_route"
-                  value={formData.proposed_route}
-                  onChange={(val) => {
-                    setFormData((prev) => ({ ...prev, proposed_route: val }));
-                    setFieldErrors((prev) => ({ ...prev, proposed_route: '' }));
-                  }}
-                  placeholder={t('apply.placeholderRoute')}
-                  categories={['Highway', 'City / Hub', 'Checkpoint']}
-                />
-              </div>
-              {fieldErrors.proposed_route && (
-                <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
-                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span>{fieldErrors.proposed_route}</span>
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                {t('apply.checkpoints')}
-              </label>
-              <LocationCombobox
-                name="intermediate_checkpoints"
-                value={formData.intermediate_checkpoints}
-                onChange={(val) => setFormData((prev) => ({ ...prev, intermediate_checkpoints: val }))}
-                placeholder={t('apply.placeholderCheckpoints')}
-                categories={['Checkpoint', 'City / Hub', 'District']}
-                isMultiComma={true}
-              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

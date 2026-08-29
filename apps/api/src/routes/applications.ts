@@ -19,7 +19,6 @@ applications.post('/', async (c) => {
     { key: 'driver_phone', label: 'Driver Phone' },
     { key: 'departure_location', label: 'Departure Location' },
     { key: 'destination', label: 'Destination' },
-    { key: 'proposed_route', label: 'Proposed Route' },
     { key: 'cargo_details', label: 'Cargo Details' },
     { key: 'travel_purpose', label: 'Travel Purpose' },
   ];
@@ -29,6 +28,8 @@ applications.post('/', async (c) => {
       return c.json({ error: `Please provide ${field.label}` }, 400);
     }
   }
+
+  const proposedRoute = (body.proposed_route || `${body.departure_location} → ${body.destination}`).trim();
   
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const randomStr = crypto.randomUUID().slice(0, 4).toUpperCase();
@@ -67,7 +68,7 @@ applications.post('/', async (c) => {
       body.intermediate_checkpoints ?? null,
       body.departure_time ?? '',
       body.return_time ?? '',
-      body.proposed_route ?? '',
+      proposedRoute,
       body.travel_purpose ?? '',
       body.cargo_type ?? '',
       body.cargo_details ?? '',
