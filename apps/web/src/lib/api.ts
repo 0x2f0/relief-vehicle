@@ -36,7 +36,7 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 			signal: options.signal || controller.signal,
 		});
 
-		if (response.status === 401 && !cleanEndpoint.includes("/auth/login")) {
+		if (response.status === 401 && token && !cleanEndpoint.includes("/auth/login")) {
 			clearAuthStorage();
 		}
 
@@ -223,7 +223,7 @@ export async function requestApplicationInfo(id: string, info_request_reason: st
 
 export async function getCheckpoints(): Promise<any[]> {
 	try {
-		const res = await fetchApi<{ checkpoints: any[] }>("/admin/checkpoints");
+		const res = await fetchApi<{ checkpoints: any[] }>("/checkpoints");
 		return res.checkpoints || [];
 	} catch {
 		return [];

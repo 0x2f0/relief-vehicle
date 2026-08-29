@@ -11,6 +11,7 @@ import verify from './routes/verify';
 import admin from './routes/admin';
 import { roads, adminRoads } from './routes/roads';
 import coordination from './routes/coordination';
+import checkpoints from './routes/checkpoints';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -28,6 +29,7 @@ app.route('/api/passes', passes);
 app.route('/api/verify', verify);
 app.route('/api/admin', admin);
 app.route('/api/roads', roads);
+app.route('/api/checkpoints', checkpoints);
 app.route('/api/admin/roads', adminRoads);
 app.route('/api/public/stats', coordination);
 app.route('/api/public', coordination);

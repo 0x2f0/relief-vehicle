@@ -20,6 +20,6 @@ if [[ "$of" == "web" ]];then
 	echo "Building Web..."
 	bun run build:web
 	echo "Deploying Web to Pages..."
-	npx wrangler pages deploy apps/web/dist --project-name=relief-vehicle
+	cd apps/web && npx wrangler pages deploy dist --project-name=relief-vehicle && cd ../..
 	echo "Done."
 fi
