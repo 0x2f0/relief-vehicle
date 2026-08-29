@@ -447,13 +447,18 @@ export const ApplyPass = () => {
                   name="vehicle_type"
                   value={formData.vehicle_type}
                   onChange={handleChange}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white font-medium"
                 >
+                  <option value="Motorcycle/Bike">{t('apply.vehicleTypeMotorcycle')}</option>
+                  <option value="Scooter">{t('apply.vehicleTypeScooter')}</option>
                   <option value="Ambulance">{t('apply.vehicleTypeAmbulance')}</option>
-                  <option value="Truck">{t('apply.vehicleTypeTruck')}</option>
-                  <option value="Pickup">{t('apply.vehicleTypePickup')}</option>
                   <option value="Jeep/SUV">{t('apply.vehicleTypeJeep')}</option>
+                  <option value="Pickup">{t('apply.vehicleTypePickup')}</option>
+                  <option value="Truck">{t('apply.vehicleTypeTruck')}</option>
                   <option value="Bus">{t('apply.vehicleTypeBus')}</option>
+                  <option value="Microbus/Van">{t('apply.vehicleTypeMicrobus')}</option>
+                  <option value="Car/Taxi">{t('apply.vehicleTypeCar')}</option>
+                  <option value="Tractor">{t('apply.vehicleTypeTractor')}</option>
                   <option value="Boat/Special">{t('apply.vehicleTypeBoat')}</option>
                 </select>
               </div>
