@@ -14,6 +14,10 @@ function hexToBytes(hex: string): Uint8Array {
   return bytes;
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+}
+
 export async function hashPassword(password: string, saltHex?: string): Promise<string> {
   const salt = saltHex ? hexToBytes(saltHex) : crypto.getRandomValues(new Uint8Array(16));
   const enc = new TextEncoder().encode(password);
@@ -29,7 +33,7 @@ export async function hashPassword(password: string, saltHex?: string): Promise<
   const derivedBits = await crypto.subtle.deriveBits(
     {
       name: 'PBKDF2',
-      salt: salt,
+      salt: toArrayBuffer(salt),
       iterations: 100000,
       hash: 'SHA-256',
     },

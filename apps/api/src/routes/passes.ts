@@ -28,12 +28,12 @@ passes.get('/:id/public', async (c) => {
     return c.json({ error: 'Pass not found' }, 404);
   }
 
-  const row = res.rows[0] as { status?: string; id: string; application_id: string };
+  const row = res.rows[0] as Record<string, unknown>;
   if (row.status !== 'active') {
     return c.json({ error: 'Pass is not active', status: row.status }, 400);
   }
 
-  const code = row.application_id || row.id;
+  const code = String(row.application_id || row.id);
   return c.json({ pass: { ...row, id: code } });
 });
 

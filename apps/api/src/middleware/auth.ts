@@ -15,7 +15,7 @@ export async function authMiddleware(c: Context<{ Bindings: Bindings; Variables:
     const { payload } = await jwtVerify(token, secret);
     c.set('user', payload);
     await next();
-  } catch (error) {
+  } catch {
     return c.json({ error: 'Invalid token' }, 401);
   }
 }
