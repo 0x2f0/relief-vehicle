@@ -57,7 +57,7 @@ export const TrackStatus = () => {
     if (!result || redirected.current) return;
     if (!isPassReady(result.status, result.pass_id, result.pass_status)) return;
     redirected.current = true;
-    const passId = result.pass_id as string;
+    const passId = result.id;
     navigate({ to: '/pass/$id', params: { id: passId } });
   }, [result, navigate]);
 

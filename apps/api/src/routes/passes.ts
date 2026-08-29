@@ -28,12 +28,13 @@ passes.get('/:id/public', async (c) => {
     return c.json({ error: 'Pass not found' }, 404);
   }
 
-  const pass = res.rows[0] as { status?: string };
-  if (pass.status !== 'active') {
-    return c.json({ error: 'Pass is not active', status: pass.status }, 400);
+  const row = res.rows[0] as { status?: string; id: string; application_id: string };
+  if (row.status !== 'active') {
+    return c.json({ error: 'Pass is not active', status: row.status }, 400);
   }
 
-  return c.json({ pass });
+  const code = row.application_id || row.id;
+  return c.json({ pass: { ...row, id: code } });
 });
 
 export default passes;

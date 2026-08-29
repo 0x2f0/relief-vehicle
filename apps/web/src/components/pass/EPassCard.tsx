@@ -21,7 +21,7 @@ export function PassCard({ pass, showPrintButton = true }: PassCardProps) {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `Emergency E-Pass: ${pass.vehicle_number || pass.id}`,
+        title: `Emergency E-Pass: ${pass.vehicle_number || pass.application_id || pass.id}`,
         text: `Official Emergency Movement E-Pass for ${pass.vehicle_number} (${pass.approved_route})`,
         url: window.location.href,
       }).catch(() => {});
@@ -86,7 +86,7 @@ export function PassCard({ pass, showPrintButton = true }: PassCardProps) {
                 {pass.priority && <PriorityBadge priority={pass.priority} />}
               </div>
               <p className="text-xs font-mono font-bold text-slate-400 print:text-black">
-                {pass.id}
+                {pass.application_id || pass.id}
               </p>
             </div>
           </div>
@@ -120,9 +120,7 @@ export function PassCard({ pass, showPrintButton = true }: PassCardProps) {
             <div className="p-2 bg-white rounded-lg shadow-inner">
               <QRCodeSVG
                 value={
-                  pass.qr_token?.startsWith('http')
-                    ? pass.qr_token
-                    : `https://relief-vehicle.pages.dev/pass/${pass.id || pass.application_id}`
+                  `https://relief-vehicle.pages.dev/pass/${pass.application_id || pass.id}`
                 }
                 size={140}
                 level="M"
@@ -133,7 +131,7 @@ export function PassCard({ pass, showPrintButton = true }: PassCardProps) {
               SCAN AT CHECKPOINT
             </p>
             <p className="text-[9px] text-slate-500 text-center uppercase tracking-tighter">
-              https://relief-vehicle.pages.dev/pass/{pass.id}
+              https://relief-vehicle.pages.dev/pass/{pass.application_id || pass.id}
             </p>
           </div>
 
@@ -220,7 +218,7 @@ export function PassCard({ pass, showPrintButton = true }: PassCardProps) {
             <span>Issued by authorized officer: {pass.issued_by}</span>
           </div>
           <div className="text-right font-mono text-[10px]">
-            Security Token ID: {pass.id}
+            Security Token ID: {pass.application_id || pass.id}
           </div>
         </div>
       </div>

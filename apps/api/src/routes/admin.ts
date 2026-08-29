@@ -67,29 +67,50 @@ admin.patch('/applications/:id/status', async (c) => {
 
 admin.post('/passes/issue', async (c) => {
   const { application_id, approved_route, valid_from, valid_until } = await c.req.json();
-  const db = getDbClient(c.env);
-  
-  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const randomStr = crypto.randomUUID().slice(0, 4).toUpperCase();
-  const id = `NP-PASS-${dateStr}-${randomStr}`;
-  const qrToken = `https://relief-vehicle.pages.dev/pass/${id}`;
-  const user = c.get('user') as any;
-  
-  const now = new Date().toISOString();
+  const appId = String(application_id || '').trim();
+  if (!appId) {
+    return c.json({ error: 'application_id required' }, 400);
+  }
 
-  await db.execute({
-    sql: 'INSERT INTO passes (id, application_id, qr_token, issued_by, issuing_authority, valid_from, valid_until, approved_route, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    args: [id, application_id, qrToken, user.id, 'Relief Coordination Center', valid_from, valid_until, approved_route, now]
+  const db = getDbClient(c.env);
+  const user = c.get('user') as any;
+  const now = new Date().toISOString();
+  const qrToken = `https://relief-vehicle.pages.dev/pass/${appId}`;
+
+  const appRes = await db.execute({
+    sql: 'SELECT id FROM applications WHERE id = ?',
+    args: [appId],
   });
+  if (appRes.rows.length === 0) {
+    return c.json({ error: 'Application not found' }, 404);
+  }
+
+  const existing = await db.execute({
+    sql: 'SELECT id FROM passes WHERE application_id = ? ORDER BY created_at DESC LIMIT 1',
+    args: [appId],
+  });
+
+  if (existing.rows.length > 0) {
+    await db.execute({
+      sql: `UPDATE passes SET qr_token = ?, valid_from = ?, valid_until = ?, approved_route = ?, status = 'active',
+            revocation_reason = NULL, revoked_at = NULL, revoked_by = NULL WHERE application_id = ?`,
+      args: [qrToken, valid_from, valid_until, approved_route, appId],
+    });
+  } else {
+    await db.execute({
+      sql: 'INSERT INTO passes (id, application_id, qr_token, issued_by, issuing_authority, valid_from, valid_until, approved_route, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      args: [appId, appId, qrToken, user.id, 'Relief Coordination Center', valid_from, valid_until, approved_route, now]
+    });
+  }
 
   await db.execute({
     sql: 'UPDATE applications SET status = ?, updated_at = ? WHERE id = ?',
-    args: ['issued', now, application_id]
+    args: ['issued', now, appId]
   });
   
-  await logAudit(c.env, 'ISSUE_PASS', 'pass', id, user.id, user.role, `Issued pass for application ${application_id}`);
+  await logAudit(c.env, 'ISSUE_PASS', 'pass', appId, user.id, user.role, `Issued pass for application ${appId}`);
   
-  return c.json({ id, qr_token: qrToken, message: 'Pass issued successfully' }, 201);
+  return c.json({ id: appId, qr_token: qrToken, message: 'Pass issued successfully' }, 201);
 });
 
 admin.post('/passes/:id/revoke', async (c) => {
@@ -99,8 +120,8 @@ admin.post('/passes/:id/revoke', async (c) => {
   const user = c.get('user') as any;
   
   await db.execute({
-    sql: 'UPDATE passes SET status = ?, revocation_reason = ?, revoked_at = ?, revoked_by = ? WHERE id = ?',
-    args: ['revoked', revocation_reason, new Date().toISOString(), user.id, id]
+    sql: 'UPDATE passes SET status = ?, revocation_reason = ?, revoked_at = ?, revoked_by = ? WHERE id = ? OR application_id = ?',
+    args: ['revoked', revocation_reason, new Date().toISOString(), user.id, id, id]
   });
   
   await logAudit(c.env, 'REVOKE_PASS', 'pass', id, user.id, user.role, `Revoked pass with reason: ${revocation_reason}`);

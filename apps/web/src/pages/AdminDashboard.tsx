@@ -1934,7 +1934,7 @@ export const AdminDashboard: React.FC = () => {
                     type="text"
                     value={trackSearchId}
                     onChange={(e) => setTrackSearchId(e.target.value)}
-                    placeholder="Application ID (उदा: APP-2026-8801 वा EP-20260829-0DE4)..."
+                    placeholder="Application ID (e.g. EP-20260829-0DE4)..."
                     className="flex-1 border border-slate-300 rounded-lg p-2.5 text-xs font-mono focus:border-[#0447AF]"
                   />
                   <button

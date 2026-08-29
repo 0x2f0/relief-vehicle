@@ -48,7 +48,7 @@ verify.post('/scan', async (c) => {
     if (appRes.rows.length > 0) {
       const app = appRes.rows[0] as any;
       const syntheticPass = {
-        id: `PASS-${app.id}`,
+        id: app.id,
         application_id: app.id,
         qr_token: tokenStr,
         issued_by: 'Emergency Dispatch Operations',

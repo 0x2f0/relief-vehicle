@@ -121,7 +121,8 @@ async function runTests() {
   assert(issueRes.status === 201, 'POST /api/admin/passes/issue generates e-pass');
   const issueData = (await issueRes.json()) as any;
   const passId = issueData.id;
-  assert(passId.startsWith('NP-PASS-'), 'Pass ID correctly formatted as NP-PASS-');
+  assert(passId === appId, 'Pass uses the same EP- tracking code as the application');
+  assert(passId.startsWith('EP-'), 'Pass ID uses the EP- tracking code');
 
   const issuedTrackRes = await app.request(`/api/applications/${appId}/track`, {}, env);
   const issuedTrack = (await issuedTrackRes.json()) as any;

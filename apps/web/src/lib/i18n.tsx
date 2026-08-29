@@ -183,6 +183,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'viewpass.shared': 'लिङ्क कपी भयो',
     'viewpass.active': 'सक्रिय',
     'viewpass.scanHint': 'चेकपोइन्टमा स्क्यान गरी प्रमाणित गर्नुहोस्',
+    'viewpass.codeLabel': 'ई-पास कोड',
 
     // Status mapping
     'status.all': 'सबै (All)',
@@ -502,6 +503,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'viewpass.shared': 'Link copied',
     'viewpass.active': 'Active',
     'viewpass.scanHint': 'Scan at the checkpoint to verify',
+    'viewpass.codeLabel': 'E-pass code',
 
     // Status mapping
     'status.all': 'All Statuses',

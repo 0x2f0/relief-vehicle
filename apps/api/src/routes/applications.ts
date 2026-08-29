@@ -98,7 +98,7 @@ applications.get('/:id/track', async (c) => {
   return c.json({
     application: {
       ...publicApp,
-      pass_id: pass?.id ?? null,
+      pass_id: pass ? id : null,
       pass_status: pass?.status ?? null,
     },
   });

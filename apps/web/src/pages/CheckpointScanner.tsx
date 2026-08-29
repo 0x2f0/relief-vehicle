@@ -226,7 +226,7 @@ export const CheckpointScanner = () => {
         setScanResult({
           status: 'VALID',
           pass: {
-            id: raw.startsWith('NP-') || raw.startsWith('PASS-') ? raw : `NP-PASS-2026-${raw.slice(-4)}`,
+            id: raw,
             application_id: raw,
             qr_token: tokenToVerify,
             issued_by: 'Relief Operations Desk',
@@ -424,7 +424,7 @@ export const CheckpointScanner = () => {
                   type="text"
                   value={manualToken}
                   onChange={(e) => setManualToken(e.target.value)}
-                  placeholder="NP-PASS-20260829-XXXX or EP-..."
+                  placeholder="EP-20260829-XXXX"
                   className="w-full border border-slate-300 rounded-lg p-3 text-sm font-mono focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]"
                 />
               </div>

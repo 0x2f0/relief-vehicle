@@ -145,7 +145,7 @@ export function QRScannerComponent({ onScanSuccess }: QRScannerProps) {
         <button
           onClick={() => setActiveTab('camera')}
           className={`flex items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
-            activeTab === 'camera' ? 'bg-red-700 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+            activeTab === 'camera' ? 'bg-red-700 text-white shadow-md' : 'text-white hover:bg-slate-800'
           }`}
         >
           <Camera className="w-3.5 h-3.5" /> Camera
@@ -153,7 +153,7 @@ export function QRScannerComponent({ onScanSuccess }: QRScannerProps) {
         <button
           onClick={() => setActiveTab('upload')}
           className={`flex items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
-            activeTab === 'upload' ? 'bg-red-700 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+            activeTab === 'upload' ? 'bg-red-700 text-white shadow-md' : 'text-white hover:bg-slate-800'
           }`}
         >
           <Upload className="w-3.5 h-3.5" /> Upload File
@@ -161,7 +161,7 @@ export function QRScannerComponent({ onScanSuccess }: QRScannerProps) {
         <button
           onClick={() => setActiveTab('manual')}
           className={`flex items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
-            activeTab === 'manual' ? 'bg-red-700 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+            activeTab === 'manual' ? 'bg-red-700 text-white shadow-md' : 'text-white hover:bg-slate-800'
           }`}
         >
           <Type className="w-3.5 h-3.5" /> Manual ID
@@ -187,7 +187,7 @@ export function QRScannerComponent({ onScanSuccess }: QRScannerProps) {
               </div>
             )}
           </div>
-          <p className="text-[11px] text-center text-slate-400">
+          <p className="text-[11px] text-center text-slate-200">
             Point camera at the QR code on the driver&apos;s digital E-Pass or printed document.
           </p>
         </div>
@@ -197,9 +197,9 @@ export function QRScannerComponent({ onScanSuccess }: QRScannerProps) {
       {activeTab === 'upload' && (
         <div className="space-y-4 py-4 text-center">
           <div className="border-2 border-dashed border-slate-700 hover:border-red-500 rounded-xl p-8 transition-colors">
-            <Upload className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-            <p className="text-xs font-semibold text-slate-300 mb-1">Select or drop pass photo / screenshot</p>
-            <p className="text-[11px] text-slate-500 mb-4">Supports PNG, JPG, WEBP formats</p>
+            <Upload className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <p className="text-xs font-semibold text-slate-200 mb-1">Select or drop pass photo / screenshot</p>
+            <p className="text-[11px] text-slate-300 mb-4">Supports PNG, JPG, WEBP formats</p>
             <label className="inline-block bg-red-700 hover:bg-red-600 text-white text-xs font-bold px-4 py-2 rounded-lg cursor-pointer transition-colors">
               Browse Image File
               <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
@@ -219,7 +219,7 @@ export function QRScannerComponent({ onScanSuccess }: QRScannerProps) {
               type="text"
               value={manualInput}
               onChange={(e) => setManualInput(e.target.value)}
-              placeholder="e.g. NP-PASS-20260829-XXXX"
+              placeholder="e.g. EP-20260829-XXXX"
               className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
               required
             />

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams, Link } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
 import { useI18n } from '../lib/i18n';
@@ -11,10 +11,17 @@ export const ViewPass = () => {
   const params = useParams({ strict: false }) as { id?: string };
   const id = params?.id || '';
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
   const { data: passRes, isLoading } = useQuery(passQueryOptions(id));
   const passData = passRes?.pass;
+
+  useEffect(() => {
+    const code = passData?.application_id || passData?.id;
+    if (!code || code === id) return;
+    navigate({ to: '/pass/$id', params: { id: code }, replace: true });
+  }, [passData, id, navigate]);
 
   const handlePrint = () => {
     window.print();
@@ -23,7 +30,7 @@ export const ViewPass = () => {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `Relief E-Pass: ${passData?.id || id}`,
+        title: `Relief E-Pass: ${passData?.application_id || passData?.id || id}`,
         url: window.location.href,
       }).catch(() => {});
     } else {
@@ -61,7 +68,8 @@ export const ViewPass = () => {
     );
   }
 
-  const qrValue = passData.qr_token || window.location.href;
+  const code = passData.application_id || passData.id;
+  const qrValue = `${window.location.origin}/pass/${code}`;
 
   return (
     <div className="space-y-6 max-w-xl mx-auto print:max-w-none print:m-0 print:p-0">
@@ -114,7 +122,7 @@ export const ViewPass = () => {
                 आपतकालीन राहत सवारी ई-पास
               </h1>
               <span className="text-[11px] font-mono text-[#0447AF] font-bold">
-                Pass ID: {passData.id}
+                {t('viewpass.codeLabel')}: {code}
               </span>
             </div>
           </div>
