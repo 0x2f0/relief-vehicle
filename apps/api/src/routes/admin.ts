@@ -75,9 +75,16 @@ admin.post('/passes/issue', async (c) => {
   const qrToken = `https://relief-vehicle.pages.dev/pass/${id}`;
   const user = c.get('user') as any;
   
+  const now = new Date().toISOString();
+
   await db.execute({
     sql: 'INSERT INTO passes (id, application_id, qr_token, issued_by, issuing_authority, valid_from, valid_until, approved_route, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    args: [id, application_id, qrToken, user.id, 'Relief Coordination Center', valid_from, valid_until, approved_route, new Date().toISOString()]
+    args: [id, application_id, qrToken, user.id, 'Relief Coordination Center', valid_from, valid_until, approved_route, now]
+  });
+
+  await db.execute({
+    sql: 'UPDATE applications SET status = ?, updated_at = ? WHERE id = ?',
+    args: ['issued', now, application_id]
   });
   
   await logAudit(c.env, 'ISSUE_PASS', 'pass', id, user.id, user.role, `Issued pass for application ${application_id}`);

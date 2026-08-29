@@ -32,3 +32,4 @@ yarn-error.log*
 *.local
 
 .dev.vars
+!.dev.vars.example

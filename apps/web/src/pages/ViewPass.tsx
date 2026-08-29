@@ -45,9 +45,9 @@ export const ViewPass = () => {
     return (
       <div className="max-w-md mx-auto my-12 bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-4">
         <AlertCircle className="w-10 h-10 text-[#CC1424] mx-auto" />
-        <h2 className="text-lg font-bold text-slate-900">ई-पास फेला परेन</h2>
+        <h2 className="text-lg font-bold text-slate-900">{t('viewpass.notFound')}</h2>
         <p className="text-xs text-slate-600">
-          प्रदान गरिएको पास वा आवेदन पहिचानकर्ता मान्य छैन।
+          {t('viewpass.notFoundHint')}
         </p>
         <Link
           to="/"
@@ -55,7 +55,7 @@ export const ViewPass = () => {
           className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#0447AF] text-white text-xs font-bold rounded-lg"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>गृहपृष्ठमा फर्कनुहोस्</span>
+          <span>{t('viewpass.home')}</span>
         </Link>
       </div>
     );
@@ -73,7 +73,7 @@ export const ViewPass = () => {
           className="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-600 hover:text-[#0447AF]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>फर्कनुहोस्</span>
+          <span>{t('viewpass.back')}</span>
         </Link>
 
         <div className="flex items-center space-x-2">
@@ -83,7 +83,7 @@ export const ViewPass = () => {
             className="inline-flex items-center space-x-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
           >
             <Share2 className="w-3.5 h-3.5" />
-            <span>{copied ? 'लिङ्क प्रतिलिपि भयो' : 'साझा गर्नुहोस्'}</span>
+            <span>{copied ? t('viewpass.shared') : t('viewpass.share')}</span>
           </button>
           <button
             type="button"
@@ -91,7 +91,7 @@ export const ViewPass = () => {
             className="inline-flex items-center space-x-1 px-3 py-1.5 bg-[#0447AF] hover:bg-[#033685] text-white text-xs font-bold rounded-lg transition-colors shadow-2xs"
           >
             <Printer className="w-3.5 h-3.5" />
-            <span>प्रिन्ट गर्नुहोस् (Print)</span>
+            <span>{t('viewpass.print')}</span>
           </button>
         </div>
       </div>
@@ -122,7 +122,7 @@ export const ViewPass = () => {
           <div className="text-right space-y-1">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 uppercase">
               <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600" />
-              सक्रिय (Active)
+              {t('viewpass.active')}
             </span>
           </div>
         </div>
@@ -133,7 +133,7 @@ export const ViewPass = () => {
             <QRCodeSVG value={qrValue} size={180} level="H" includeMargin={true} />
           </div>
           <span className="text-[11px] font-mono text-slate-500 font-semibold">
-            Scan to Verify Cryptographic Signature
+            {t('viewpass.scanHint')}
           </span>
         </div>
 

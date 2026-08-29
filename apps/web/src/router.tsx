@@ -5,6 +5,7 @@ import {
   createRouter,
   Outlet,
   ScrollRestoration,
+  redirect,
 } from '@tanstack/react-router';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
@@ -27,6 +28,13 @@ import {
   prefetchPublicData,
   prefetchAdminData,
 } from './lib/queryClient';
+import { isStaffSession } from './lib/authSession';
+
+function requireStaffSession() {
+  if (!isStaffSession()) {
+    throw redirect({ to: '/admin/login' });
+  }
+}
 
 // Root Route Container with Layout, Preload Hook & Scroll Restoration
 const RootComponent = () => {
@@ -78,6 +86,9 @@ export const trackRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/track',
   component: TrackStatus,
+  validateSearch: (search: Record<string, unknown>): { code?: string } => ({
+    code: typeof search.code === 'string' && search.code.trim() ? search.code.trim() : undefined,
+  }),
 });
 
 export const passRoute = createRoute({
@@ -121,18 +132,27 @@ export const roadsRoute = createRoute({
 export const coordinationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/coordination',
+  beforeLoad: requireStaffSession,
+  staleTime: 0,
+  preloadStaleTime: 0,
   component: CoordinationCenter,
 });
 
 export const adminCoordinationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/coordination',
+  beforeLoad: requireStaffSession,
+  staleTime: 0,
+  preloadStaleTime: 0,
   component: CoordinationCenter,
 });
 
 export const adminAuditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/audit',
+  beforeLoad: requireStaffSession,
+  staleTime: 0,
+  preloadStaleTime: 0,
   component: AdminAuditLogs,
 });
 
@@ -145,18 +165,24 @@ export const adminLoginRoute = createRoute({
 export const adminDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/dashboard',
+  beforeLoad: requireStaffSession,
+  staleTime: 0,
+  preloadStaleTime: 0,
   component: AdminDashboard,
   loader: () => {
-    prefetchAdminData();
+    if (isStaffSession()) prefetchAdminData();
   },
 });
 
 export const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
+  beforeLoad: requireStaffSession,
+  staleTime: 0,
+  preloadStaleTime: 0,
   component: AdminDashboard,
   loader: () => {
-    prefetchAdminData();
+    if (isStaffSession()) prefetchAdminData();
   },
 });
 
@@ -182,7 +208,7 @@ const routeTree = rootRoute.addChildren([
 export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
-  defaultPreloadStaleTime: 30_000,
+  defaultPreloadStaleTime: 0,
   scrollRestoration: true,
 });
 

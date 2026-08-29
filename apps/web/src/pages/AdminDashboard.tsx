@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouter } from '@tanstack/react-router';
 import jsQR from 'jsqr';
 import { useI18n } from '../lib/i18n';
 import {
@@ -24,6 +24,7 @@ import {
   api,
 } from '../lib/api';
 import { Application, Pass, RoadCondition, Priority, AuditLog, CoordinationDashboardData } from '../lib/types';
+import { clearAuthSession, getAuthToken } from '../lib/authSession';
 import {
   LayoutDashboard,
   FileText,
@@ -60,6 +61,7 @@ import {
 export const AdminDashboard: React.FC = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const router = useRouter();
 
   // Active Admin View Tab
   const [activeTab, setActiveTab] = useState<
@@ -111,6 +113,7 @@ export const AdminDashboard: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [lockUntilIssued, setLockUntilIssued] = useState(false);
 
   // Modals state
   const [showIssueModal, setShowIssueModal] = useState(false);
@@ -193,130 +196,12 @@ export const AdminDashboard: React.FC = () => {
     setLoading(true);
     try {
       const data = await getAdminApplications();
-      if (data && data.length > 0) {
-        setApplications(data);
-      } else {
-        throw new Error('Fallback operational dataset');
-      }
+      setApplications(data || []);
     } catch {
-      setApplications([
-        {
-          id: 'EP-20260829-0DE4',
-          secret_token: 'sec-0de4',
-          applicant_name: 'Dr. Aarav Sharma',
-          applicant_phone: '9841998877',
-          applicant_email: 'aarav@patanhospital.gov.np',
-          org_name: 'Patan Hospital Emergency Medical Corps',
-          org_type: 'Medical Team',
-          vehicle_number: 'BA 3 CHA 1199',
-          vehicle_type: 'Mobile Surgical Unit / 4x4',
-          vehicle_owner: 'Patan Hospital',
-          driver_name: 'Suman Shrestha',
-          driver_phone: '9841002233',
-          passenger_count: 4,
-          vehicle_capacity: '2.5 Tons',
-          emergency_contact: '9841998877',
-          departure_location: 'Lalitpur (Patan)',
-          destination: 'Sindhupalchok (Chautara Health Center)',
-          proposed_route: 'Araniko Highway -> Zero Kilo -> Chautara',
-          departure_time: new Date().toISOString(),
-          return_time: new Date(Date.now() + 86400000 * 3).toISOString(),
-          travel_purpose: 'Emergency trauma surgery and portable blood refrigeration delivery',
-          cargo_type: 'Medical Supplies',
-          cargo_details: 'Portable ventilator, blood packs, trauma surgery equipment (800 kg)',
-          priority: 'Critical',
-          status: 'submitted',
-          created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-          updated_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-        },
-        {
-          id: 'EP-20260829-7624',
-          secret_token: 'sec-7624',
-          applicant_name: 'Sita Gurung',
-          applicant_phone: '9851122334',
-          applicant_email: 'relief@redcross.org.np',
-          org_name: 'Nepal Red Cross Society',
-          org_type: 'Relief Organization',
-          vehicle_number: 'BA 2 KHA 8801',
-          vehicle_type: 'Heavy Truck (4x4)',
-          vehicle_owner: 'Nepal Red Cross Logistics',
-          driver_name: 'Santosh Thapa',
-          driver_phone: '9841002233',
-          passenger_count: 3,
-          vehicle_capacity: '5 Tons',
-          emergency_contact: '9851122334',
-          departure_location: 'Kathmandu (Balkhu Relief Base)',
-          destination: 'Sindhupalchok (Melamchi)',
-          proposed_route: 'Araniko Highway -> Dolalghat -> Melamchi',
-          departure_time: new Date().toISOString(),
-          return_time: new Date(Date.now() + 86400000 * 2).toISOString(),
-          travel_purpose: 'Water purification kits and essential baby food packets',
-          cargo_type: 'Relief / Donation',
-          cargo_details: '200 water filters, 500 dry ration packets, 100 tarpaulins (3,200 kg)',
-          priority: 'High',
-          status: 'approved',
-          created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-          updated_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-        },
-        {
-          id: 'EP-20260829-3310',
-          secret_token: 'sec-3310',
-          applicant_name: 'Bimal Shrestha',
-          applicant_phone: '9841556677',
-          applicant_email: 'bimal@wfp-nepal.org',
-          org_name: 'World Food Programme (WFP Logistics)',
-          org_type: 'International NGO',
-          vehicle_number: 'PRA 3-01-003 CHA 4410',
-          vehicle_type: 'Medium Truck',
-          vehicle_owner: 'WFP Nepal',
-          driver_name: 'Gopal BK',
-          driver_phone: '9860112233',
-          passenger_count: 2,
-          vehicle_capacity: '8 Tons',
-          emergency_contact: '9841556677',
-          departure_location: 'Hetauda Central Depot',
-          destination: 'Ramechhap (Manthali)',
-          proposed_route: 'BP Highway -> Khurkot -> Manthali',
-          departure_time: new Date().toISOString(),
-          return_time: new Date(Date.now() + 86400000 * 3).toISOString(),
-          travel_purpose: 'High-energy biscuits and family hygiene packages',
-          cargo_type: 'Relief / Donation',
-          cargo_details: '4,000 kg nutrition packets and potable water jerrycans',
-          priority: 'Medium',
-          status: 'issued',
-          created_at: new Date(Date.now() - 3600000 * 10).toISOString(),
-          updated_at: new Date(Date.now() - 3600000 * 10).toISOString(),
-        },
-        {
-          id: 'EP-20260829-9182',
-          secret_token: 'sec-9182',
-          applicant_name: 'Dhurba Regmi',
-          applicant_phone: '9851099881',
-          applicant_email: 'dhurba@rescue-nepal.org',
-          org_name: 'Himalayan Search & Rescue Corps',
-          org_type: 'Rescue Team',
-          vehicle_number: 'BA 2 CHA 9002',
-          vehicle_type: 'Rescue Jeep (4x4 Heavy Winch)',
-          vehicle_owner: 'HRA Nepal',
-          driver_name: 'Pemba Sherpa',
-          driver_phone: '9841887766',
-          passenger_count: 4,
-          vehicle_capacity: '1.5 Tons',
-          emergency_contact: '9851099881',
-          departure_location: 'Kathmandu (Teaching Hospital)',
-          destination: 'Sindhupalchok (Bahrabise)',
-          proposed_route: 'Araniko Highway -> Dolalghat -> Bahrabise',
-          departure_time: new Date().toISOString(),
-          return_time: new Date(Date.now() + 86400000 * 4).toISOString(),
-          travel_purpose: 'Landslide survivor extraction and medical evacuation',
-          cargo_type: 'Search & Rescue Equipment',
-          cargo_details: 'Hydraulic cutters, rope winches, oxygen tanks (950 kg)',
-          priority: 'Critical',
-          status: 'issued',
-          created_at: new Date(Date.now() - 3600000 * 18).toISOString(),
-          updated_at: new Date(Date.now() - 3600000 * 18).toISOString(),
-        },
-      ]);
+      setApplications([]);
+      if (!getAuthToken()) {
+        navigate({ to: '/admin/login', replace: true });
+      }
     } finally {
       setLoading(false);
     }
@@ -330,24 +215,10 @@ export const AdminDashboard: React.FC = () => {
         setCoordinationData(data);
       }
     } catch {
-      setCoordinationData({
-        duplicateAlerts: [],
-        destinations: [
-          { destination: 'Sindhupalchok (Melamchi / Chautara)', count: 6 },
-          { destination: 'Ramechhap (Manthali)', count: 4 },
-          { destination: 'Dhading (Malekhu / Gajuri)', count: 3 },
-          { destination: 'Kavrepalanchok (Roshy / Panauti)', count: 2 },
-        ],
-        routes: [
-          { route: 'Araniko Highway (H03) -> Dolalghat -> Melamchi', count: 7 },
-          { route: 'BP Highway (H08) -> Khurkot -> Manthali', count: 4 },
-          { route: 'Prithvi Highway (H04) -> Nagdhunga -> Malekhu', count: 3 },
-        ],
-        roadHazards: [
-          { road: 'Araniko Highway (Dolalghat - Melamchi)', status: 'restricted', reason: 'Single-lane clearance after landslide' },
-          { road: 'BP Highway (Nepalthok - Khurkot)', status: 'restricted', reason: 'Flash flood debris clearance' },
-        ],
-      });
+      setCoordinationData(null);
+      if (!getAuthToken()) {
+        navigate({ to: '/admin/login', replace: true });
+      }
     } finally {
       setCoordLoading(false);
     }
@@ -357,17 +228,7 @@ export const AdminDashboard: React.FC = () => {
     setCpLoading(true);
     try {
       const data = await getCheckpoints();
-      if (data && data.length > 0) {
-        setCheckpoints(data);
-      } else {
-        setCheckpoints([
-          { id: 'CP-DOLALGHAT', name: 'Dolalghat Transit Checkpoint', location: 'Dolalghat Bridge', district: 'Kavrepalanchok', highway: 'Araniko Highway (H03)' },
-          { id: 'CP-NAGDHUNGA', name: 'Nagdhunga Main Checkpoint', location: 'Nagdhunga Pass', district: 'Kathmandu', highway: 'Tribhuvan Highway (H02)' },
-          { id: 'CP-MELAMCHI', name: 'Melamchi Relief Post', location: 'Melamchi Bazar', district: 'Sindhupalchok', highway: 'Helambu Corridor' },
-          { id: 'CP-MALEKHU', name: 'Malekhu Highway Station', location: 'Malekhu Junction', district: 'Dhading', highway: 'Prithvi Highway (H04)' },
-          { id: 'CP-BAHRABISE', name: 'Bahrabise Transit Station', location: 'Bahrabise Town', district: 'Sindhupalchok', highway: 'Kodari Highway (H03)' },
-        ]);
-      }
+      setCheckpoints(data || []);
     } catch {
       setCheckpoints([]);
     } finally {
@@ -379,15 +240,7 @@ export const AdminDashboard: React.FC = () => {
     setUsersLoading(true);
     try {
       const users = await getAdminUsers();
-      if (users && users.length > 0) {
-        setUsersList(users);
-      } else {
-        setUsersList([
-          { id: 'USR-ADMIN-01', username: 'admin', role: 'superadmin', full_name: 'National Emergency Controller', checkpoint_name: 'Central Command HQ', badge_number: 'HQ-001', phone: '1149', created_at: new Date().toISOString() },
-          { id: 'USR-OFFICER-01', username: 'officer_dolalghat', role: 'checkpoint_officer', full_name: 'Insp. B. Thapa', checkpoint_name: 'Dolalghat Transit Checkpoint', badge_number: 'NP-POL-4410', phone: '9851000001', created_at: new Date().toISOString() },
-          { id: 'USR-GOV-01', username: 'gov_officer1', role: 'gov_officer', full_name: 'Under Secretary K. Sharma', checkpoint_name: 'Ministry Operations Desk', badge_number: 'GOV-7701', phone: '9851122334', created_at: new Date().toISOString() },
-        ]);
-      }
+      setUsersList(users || []);
     } catch {
       setUsersList([]);
     } finally {
@@ -416,47 +269,21 @@ export const AdminDashboard: React.FC = () => {
       });
       setAuditLogs(res.logs || []);
     } catch {
-      setAuditLogs([
-        {
-          id: 'AUD-001',
-          action: 'ISSUE_PASS',
-          entity_type: 'pass',
-          entity_id: 'NP-PASS-20260829-3310',
-          actor_name: 'National Emergency Controller',
-          actor_role: 'superadmin',
-          ip_address: '103.10.28.14',
-          details: 'Pass issued for WFP Nepal essential food transit to Ramechhap',
-          created_at: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
-        },
-        {
-          id: 'AUD-002',
-          action: 'VERIFY_CHECKPOINT_SCAN',
-          entity_type: 'checkpoint',
-          entity_id: 'CP-DOLALGHAT',
-          actor_name: 'Insp. B. Thapa',
-          actor_role: 'checkpoint_officer',
-          ip_address: '27.34.20.19',
-          details: 'Vehicle BA 2 CHA 9002 cleared for outbound transit to Sindhupalchok',
-          created_at: new Date(Date.now() - 1000 * 60 * 50).toISOString(),
-        },
-        {
-          id: 'AUD-003',
-          action: 'UPDATE_ROAD_HAZARD',
-          entity_type: 'road',
-          entity_id: 'ROAD-ARANIKO-01',
-          actor_name: 'Under Secretary K. Sharma',
-          actor_role: 'gov_officer',
-          ip_address: '103.10.28.2',
-          details: 'Set Araniko Highway status to restricted due to landslide debris clearance',
-          created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-        },
-      ]);
+      setAuditLogs([]);
+      if (!getAuthToken()) {
+        navigate({ to: '/admin/login', replace: true });
+      }
     } finally {
       setAuditLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!getAuthToken()) {
+      navigate({ to: '/admin/login', replace: true });
+      return;
+    }
+
     const userStr = localStorage.getItem('adminUser') || localStorage.getItem('relief_user');
     if (userStr) {
       try {
@@ -482,25 +309,31 @@ export const AdminDashboard: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('relief_auth_token');
-    localStorage.removeItem('token');
-    localStorage.removeItem('adminUser');
-    localStorage.removeItem('adminUsername');
-    localStorage.removeItem('relief_user');
-    window.dispatchEvent(new Event('auth-change'));
-    navigate({ to: '/admin/login' });
+    clearAuthSession();
+    setCurrentUser(null);
+    void router.invalidate();
+    navigate({ to: '/admin/login', replace: true });
+  };
+
+  const awaitingIssue = Boolean(lockUntilIssued && selectedApp?.status === 'approved');
+
+  const closeReview = () => {
+    if (awaitingIssue) return;
+    setSelectedApp(null);
+    setShowIssueModal(false);
   };
 
   // Actions on Applications
-  const handleApprove = async (id: string) => {
+  const handleApprove = async (app: Application) => {
     setActionLoading(true);
+    setSelectedApp(app);
+    setIssueApprovedRoute(app.proposed_route || `${app.departure_location} -> ${app.destination}`);
     try {
-      await updateApplicationStatus(id, 'approved', 'Approved by authorized duty officer after mission manifest verification');
+      await updateApplicationStatus(app.id, 'approved', 'Approved by authorized duty officer after mission manifest verification');
       await fetchApplicationsData();
-      if (selectedApp?.id === id) {
-        setSelectedApp({ ...selectedApp, status: 'approved' });
-      }
+      setSelectedApp({ ...app, status: 'approved' });
+      setLockUntilIssued(true);
+      setShowIssueModal(true);
     } catch (err: any) {
       alert(err.message || 'Approval failed');
     } finally {
@@ -525,6 +358,7 @@ export const AdminDashboard: React.FC = () => {
       });
       await fetchApplicationsData();
       setSelectedApp({ ...selectedApp, status: 'issued' });
+      setLockUntilIssued(false);
       setShowIssueModal(false);
     } catch (err: any) {
       alert(err.message || 'Pass issuance failed');
@@ -948,9 +782,9 @@ export const AdminDashboard: React.FC = () => {
       case 'submitted':
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">दर्ता भएको (Submitted)</span>;
       case 'under_review':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">समीक्षामा (Under Review)</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200">समीक्षामा (Under Review)</span>;
       case 'info_requested':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">थप विवरण माग (Info Requested)</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">थप विवरण माग (Info Requested)</span>;
       case 'approved':
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">स्वीकृत (Approved)</span>;
       case 'issued':
@@ -967,15 +801,19 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  if (!getAuthToken()) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col lg:flex-row min-h-[88vh] bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
       {/* 1. VERTICAL SIDEBAR NAVIGATION */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 bg-slate-900 text-white flex flex-col justify-between transform transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-[60] w-72 bg-slate-900 text-white flex flex-col justify-between transform transition-transform duration-200 lg:static lg:translate-x-0 lg:max-h-[88vh] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-5 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)] lg:max-h-none">
+        <div className="p-5 space-y-6 overflow-y-auto flex-1 min-h-0">
           {/* Header Identity */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-700/60">
             <div className="flex items-center gap-3">
@@ -1014,7 +852,7 @@ export const AdminDashboard: React.FC = () => {
               <span
                 className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
                   currentUser?.role === 'superadmin'
-                    ? 'bg-purple-900/80 text-purple-200 border border-purple-600/50'
+                    ? 'bg-slate-800 text-slate-200 border border-slate-600/50'
                     : currentUser?.role === 'gov_officer'
                     ? 'bg-blue-900/80 text-blue-200 border border-blue-600/50'
                     : 'bg-emerald-900/80 text-emerald-200 border border-emerald-600/50'
@@ -1059,7 +897,7 @@ export const AdminDashboard: React.FC = () => {
                   <span>{t('admin.overview')}</span>
                 </div>
                 {pendingCount > 0 && (
-                  <span className="bg-amber-500 text-slate-950 font-black px-1.5 py-0.5 rounded-full text-[10px]">
+                  <span className="bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded-full text-[10px]">
                     {pendingCount}
                   </span>
                 )}
@@ -1188,7 +1026,7 @@ export const AdminDashboard: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center space-x-2.5">
-                  <Building className="w-4 h-4 text-cyan-400" />
+                  <Building className="w-4 h-4 text-blue-300" />
                   <span>{t('admin.tabCheckpoints')}</span>
                 </div>
                 <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">
@@ -1218,10 +1056,10 @@ export const AdminDashboard: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center space-x-2.5">
-                    <Users className="w-4 h-4 text-purple-400" />
+                    <Users className="w-4 h-4 text-sky-400" />
                     <span>{t('admin.tabUsers')}</span>
                   </div>
-                  <span className="text-[10px] bg-purple-950 text-purple-300 px-1.5 py-0.5 rounded font-mono">
+                  <span className="text-[10px] bg-slate-950 text-slate-300 px-1.5 py-0.5 rounded font-mono">
                     {usersList.length}
                   </span>
                 </button>
@@ -1253,12 +1091,12 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Sidebar Footer & Actions */}
-        <div className="p-4 bg-slate-950 border-t border-slate-800/60 space-y-2">
+        <div className="p-4 bg-slate-950 border-t border-slate-800/60 space-y-2 flex-shrink-0">
           {isSuperAdmin && (
             <button
               type="button"
               onClick={() => setShowAddUserModal(true)}
-              className="w-full flex items-center justify-center space-x-2 bg-violet-600 hover:bg-violet-700 text-white py-2 px-3 rounded-lg text-xs font-bold shadow-sm transition-colors"
+              className="w-full flex items-center justify-center space-x-2 bg-[#0447AF] hover:bg-[#033685] text-white py-2 px-3 rounded-lg text-xs font-bold shadow-sm transition-colors"
             >
               <UserPlus className="w-3.5 h-3.5" />
               <span>{t('admin.addMember')}</span>
@@ -1369,7 +1207,7 @@ export const AdminDashboard: React.FC = () => {
               {criticalOnlyCount > 0 && (
                 <div className="bg-red-50 border border-red-300 rounded-2xl p-4 sm:p-5 flex items-start justify-between gap-3 shadow-sm">
                   <div className="flex items-start space-x-3">
-                    <AlertOctagon className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5 animate-bounce" />
+                    <AlertOctagon className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <h3 className="text-sm font-bold text-red-900">
                         अत्यावश्यक राहत तथा उद्धार क्लियरेन्स अनुरोध ({criticalOnlyCount} Critical Missions Pending)
@@ -1498,7 +1336,7 @@ export const AdminDashboard: React.FC = () => {
                           {app.status === 'submitted' && (
                             <button
                               type="button"
-                              onClick={() => handleApprove(app.id)}
+                              onClick={() => handleApprove(app)}
                               className="px-2.5 py-1 bg-[#0447AF] hover:bg-[#033685] text-white font-bold rounded-lg text-xs"
                             >
                               स्वीकृत
@@ -1706,7 +1544,7 @@ export const AdminDashboard: React.FC = () => {
                           {app.status === 'submitted' && (
                             <button
                               type="button"
-                              onClick={() => handleApprove(app.id)}
+                              onClick={() => handleApprove(app)}
                               disabled={actionLoading}
                               className="px-2.5 py-1 bg-[#0447AF] hover:bg-[#033685] text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
                             >
@@ -2293,7 +2131,7 @@ export const AdminDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddUserModal(true)}
-                  className="px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center space-x-1.5"
+                  className="px-3 py-2 bg-[#0447AF] hover:bg-[#033685] text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center space-x-1.5"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   <span>{t('admin.addMember')}</span>
@@ -2323,7 +2161,7 @@ export const AdminDashboard: React.FC = () => {
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                               u.role === 'superadmin'
-                                ? 'bg-purple-100 text-purple-800 border border-purple-200'
+                                ? 'bg-slate-100 text-slate-800 border border-slate-200'
                                 : u.role === 'gov_officer'
                                 ? 'bg-blue-100 text-blue-800 border border-blue-200'
                                 : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
@@ -2476,7 +2314,7 @@ export const AdminDashboard: React.FC = () => {
 
       {/* MODAL 1: APPLICATION MANIFEST & REVIEW DRAWER */}
       {selectedApp && !showIssueModal && !showRejectModal && !showRevokeModal && !showHoldModal && !showRequestInfoModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 space-y-5 max-h-[92vh] overflow-y-auto">
             {/* Header */}
             <div className="flex justify-between items-start border-b border-slate-200 pb-4">
@@ -2492,14 +2330,21 @@ export const AdminDashboard: React.FC = () => {
                   {selectedApp.org_name || selectedApp.applicant_name} — {t('admin.manifest')}
                 </h2>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedApp(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              {!awaitingIssue && (
+                <button
+                  type="button"
+                  onClick={closeReview}
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
             </div>
+            {awaitingIssue && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 text-xs font-semibold">
+                {t('admin.issueRequired')}
+              </div>
+            )}
 
             {/* Grid Manifest Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -2560,7 +2405,7 @@ export const AdminDashboard: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowRequestInfoModal(true)}
-                      className="px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg text-xs font-bold hover:bg-purple-100 flex items-center space-x-1"
+                      className="px-3 py-1.5 bg-blue-50 text-[#033685] border border-blue-200 rounded-lg text-xs font-bold hover:bg-blue-100 flex items-center space-x-1"
                     >
                       <HelpCircle className="w-3.5 h-3.5" />
                       <span>{t('admin.requestInfo')}</span>
@@ -2599,17 +2444,18 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <button
                   type="button"
-                  onClick={() => setSelectedApp(null)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  onClick={closeReview}
+                  disabled={awaitingIssue}
+                  className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  बन्द गर्नुहोस् (Close)
+                  {t('admin.close')}
                 </button>
 
                 {selectedApp.status === 'submitted' && (
                   <button
                     type="button"
                     disabled={actionLoading}
-                    onClick={() => handleApprove(selectedApp.id)}
+                    onClick={() => handleApprove(selectedApp)}
                     className="px-5 py-2 bg-[#0447AF] hover:bg-[#033685] text-white rounded-lg text-xs font-bold shadow-sm transition-all"
                   >
                     {actionLoading ? 'Approving...' : t('admin.approve')}
@@ -2645,7 +2491,7 @@ export const AdminDashboard: React.FC = () => {
 
       {/* MODAL 2: ISSUE PASS MODAL */}
       {showIssueModal && selectedApp && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
@@ -2824,7 +2670,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
             <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-              <HelpCircle className="w-5 h-5 text-purple-600" />
+              <HelpCircle className="w-5 h-5 text-[#0447AF]" />
               <span>थप विवरण माग गर्नुहोस् (Request Additional Info)</span>
             </h3>
             <form onSubmit={handleRequestInfoSubmit} className="space-y-3">
@@ -2834,7 +2680,7 @@ export const AdminDashboard: React.FC = () => {
                 value={infoRequestReason}
                 onChange={(e) => setInfoRequestReason(e.target.value)}
                 placeholder="निवेदकले पेश गर्नुपर्ने थप कागजात वा स्पष्टीकरण खुलाउनुहोस्..."
-                className="w-full border border-slate-300 rounded-lg p-3 text-xs focus:border-purple-600"
+                className="w-full border border-slate-300 rounded-lg p-3 text-xs focus:border-[#0447AF]"
               />
               <div className="flex justify-end space-x-2">
                 <button
@@ -2847,7 +2693,7 @@ export const AdminDashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-4 py-2 rounded-lg bg-purple-600 text-white text-xs font-bold hover:bg-purple-700"
+                  className="px-4 py-2 rounded-lg bg-[#0447AF] text-white text-xs font-bold hover:bg-[#033685]"
                 >
                   {actionLoading ? 'Sending...' : 'माग पठाउनुहोस् (Send Request)'}
                 </button>
@@ -2944,7 +2790,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-                <UserPlus className="w-4 h-4 text-purple-600" />
+                <UserPlus className="w-4 h-4 text-[#0447AF]" />
                 <span>{t('admin.addMember')}</span>
               </h3>
               <button type="button" onClick={() => setShowAddUserModal(false)} className="p-1 rounded text-slate-400 hover:text-slate-600">
@@ -3058,7 +2904,7 @@ export const AdminDashboard: React.FC = () => {
                 <button type="button" onClick={() => setShowAddUserModal(false)} className="px-4 py-2 rounded-lg border text-xs font-semibold">
                   Cancel
                 </button>
-                <button type="submit" disabled={actionLoading} className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold">
+                <button type="submit" disabled={actionLoading} className="px-4 py-2 rounded-lg bg-[#0447AF] hover:bg-[#033685] text-white text-xs font-bold">
                   {actionLoading ? 'Creating...' : t('admin.createMemberBtn')}
                 </button>
               </div>

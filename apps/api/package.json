@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --env-file ../../.env",
     "build": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy"
   },

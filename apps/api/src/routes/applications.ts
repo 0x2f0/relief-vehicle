@@ -63,20 +63,45 @@ applications.post('/', async (c) => {
 });
 
 applications.get('/:id/track', async (c) => {
-  const id = c.req.param('id');
-  const token = c.req.query('token');
-  
+  const id = (c.req.param('id') || '').trim();
+  const token = (c.req.query('token') || '').trim();
   const db = getDbClient(c.env);
+
   const res = await db.execute({
-    sql: 'SELECT * FROM applications WHERE id = ? AND secret_token = ?',
-    args: [id, token || '']
+    sql: `SELECT id, applicant_name, applicant_phone, org_name, org_type,
+          vehicle_number, vehicle_type, driver_name, driver_phone,
+          departure_location, destination, proposed_route, cargo_type,
+          cargo_details, travel_purpose, priority, status, admin_notes,
+          info_request_reason, secret_token, created_at, updated_at
+          FROM applications WHERE id = ?`,
+    args: [id],
   });
 
   if (res.rows.length === 0) {
+    return c.json({ error: 'Application not found' }, 404);
+  }
+
+  const row = res.rows[0] as Record<string, unknown>;
+  if (token && row.secret_token !== token) {
     return c.json({ error: 'Application not found or invalid token' }, 404);
   }
 
-  return c.json({ application: res.rows[0] });
+  const passRes = await db.execute({
+    sql: `SELECT id, status FROM passes WHERE application_id = ? ORDER BY created_at DESC LIMIT 1`,
+    args: [id],
+  });
+  const pass = passRes.rows[0] as { id?: string; status?: string } | undefined;
+
+  const { secret_token: _ignored, ...publicApp } = row;
+  void _ignored;
+
+  return c.json({
+    application: {
+      ...publicApp,
+      pass_id: pass?.id ?? null,
+      pass_status: pass?.status ?? null,
+    },
+  });
 });
 
 export default applications;

@@ -1,0 +1,6 @@
+TURSO_URL="turso://your-db.turso.io"
+TURSO_AUTH_TOKEN=""
+JWT_SECRET=""
+HMAC_SECRET=""
+CORS_ORIGIN="*"
+ENVIRONMENT="development"

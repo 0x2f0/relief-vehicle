@@ -7,12 +7,13 @@ import {
 	CheckpointScan,
 	CoordinationDashboardData,
 } from "./types";
+import { clearAuthStorage, getAuthToken } from "./authStorage";
 
 const RAW_API_URL = (import.meta.env.VITE_API_URL as string | undefined) || "";
 const BASE_URL = RAW_API_URL ? RAW_API_URL.replace(/\/$/, "") : "/api";
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-	const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
+	const token = getAuthToken();
 	const headers: Record<string, string> = {
 		"Content-Type": "application/json",
 		...(options.headers as Record<string, string>),
@@ -29,6 +30,10 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 		...options,
 		headers,
 	});
+
+	if (response.status === 401 && !cleanEndpoint.includes("/auth/login")) {
+		clearAuthStorage();
+	}
 
 	if (!response.ok) {
 		const errorBody = await response.json().catch(() => ({}));

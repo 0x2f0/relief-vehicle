@@ -50,7 +50,9 @@ export interface Application {
   status: ApplicationStatus;
   admin_notes?: string;
   info_request_reason?: string;
-  secret_token: string;
+  secret_token?: string;
+  pass_id?: string | null;
+  pass_status?: string | null;
   created_at: string;
   updated_at: string;
 }

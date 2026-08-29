@@ -1,26 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User } from '../lib/types';
 import { api } from '../lib/api';
+import { clearAuthSession, getAuthToken } from '../lib/authSession';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('relief_user');
+    const saved = localStorage.getItem('relief_user') || localStorage.getItem('adminUser');
     return saved ? JSON.parse(saved) : null;
   });
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('relief_auth_token'));
+  const [token, setToken] = useState<string | null>(() => getAuthToken());
   const [loading, setLoading] = useState<boolean>(true);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('relief_auth_token');
-    localStorage.removeItem('relief_user');
+    clearAuthSession();
     setToken(null);
     setUser(null);
   }, []);
 
   const checkAuth = useCallback(async () => {
-    const currentToken = localStorage.getItem('relief_auth_token');
+    const currentToken = getAuthToken();
     if (!currentToken) {
       setUser(null);
+      setToken(null);
       setLoading(false);
       return;
     }
@@ -28,6 +29,7 @@ export function useAuth() {
     try {
       const res = await api.getMe();
       setUser(res);
+      setToken(currentToken);
       localStorage.setItem('relief_user', JSON.stringify(res));
     } catch {
       logout();
@@ -38,6 +40,22 @@ export function useAuth() {
 
   useEffect(() => {
     checkAuth();
+    const sync = () => {
+      const currentToken = getAuthToken();
+      if (!currentToken) {
+        setUser(null);
+        setToken(null);
+        setLoading(false);
+        return;
+      }
+      void checkAuth();
+    };
+    window.addEventListener('auth-change', sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener('auth-change', sync);
+      window.removeEventListener('storage', sync);
+    };
   }, [checkAuth]);
 
   const loginSuccess = (newToken: string, newUser: User) => {

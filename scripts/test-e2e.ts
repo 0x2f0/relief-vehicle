@@ -68,12 +68,21 @@ async function runTests() {
 
   const appId = submitData.id;
   const secretToken = submitData.secret_token;
+  assert(Boolean(secretToken), 'Secret token is issued alongside tracking code');
 
-  // 3. Track Application
-  const trackRes = await app.request(`/api/applications/${appId}/track?token=${secretToken}`, {}, env);
-  assert(trackRes.status === 200, 'GET /api/applications/:id/track with secret token returns details');
+  // 3. Track Application by public tracking code (no secret token required)
+  const trackRes = await app.request(`/api/applications/${appId}/track`, {}, env);
+  assert(trackRes.status === 200, 'GET /api/applications/:id/track by tracking code returns details');
   const trackData = (await trackRes.json()) as any;
   assert(trackData.application.id === appId, 'Tracked application ID matches');
+  assert(!trackData.application.secret_token, 'Track response does not leak secret token');
+
+  const trackWithTokenRes = await app.request(
+    `/api/applications/${appId}/track?token=${secretToken}`,
+    {},
+    env
+  );
+  assert(trackWithTokenRes.status === 200, 'Track still accepts optional secret token');
 
   // 4. Staff Login
   const adminPassword = process.env.ADMIN_PASSWORD || 'N30c#M4st3r$9xK7#vQ2@2026!zL';
@@ -113,6 +122,19 @@ async function runTests() {
   const issueData = (await issueRes.json()) as any;
   const passId = issueData.id;
   assert(passId.startsWith('NP-PASS-'), 'Pass ID correctly formatted as NP-PASS-');
+
+  const issuedTrackRes = await app.request(`/api/applications/${appId}/track`, {}, env);
+  const issuedTrack = (await issuedTrackRes.json()) as any;
+  assert(issuedTrack.application?.status === 'issued', 'Tracking code shows issued after pass creation');
+  assert(issuedTrack.application?.pass_id === passId, 'Tracking payload includes issued pass id');
+
+  const publicByPassRes = await app.request(`/api/passes/${passId}/public`, {}, env);
+  assert(publicByPassRes.status === 200, 'GET /api/passes/:passId/public returns active pass');
+  const publicByAppRes = await app.request(`/api/passes/${appId}/public`, {}, env);
+  assert(publicByAppRes.status === 200, 'GET /api/passes/:applicationId/public also returns the QR pass');
+  const publicPass = (await publicByAppRes.json()) as any;
+  assert(Boolean(publicPass.pass?.qr_token), 'Public pass includes QR token');
+  assert(Boolean(publicPass.pass?.vehicle_number), 'Public pass includes vehicle details from application');
 
   // 6. Checkpoint Scan Verification (Online)
   const qrPayload = JSON.stringify({ pass_id: passId, vehicle: 'BA 3 CHA 1199' });
