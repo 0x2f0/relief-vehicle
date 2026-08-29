@@ -132,9 +132,6 @@ export const ApplyPass = () => {
       if (!formData.cargo_details.trim()) {
         newErrors.cargo_details = t('apply.errCargo');
       }
-      if (!formData.travel_purpose.trim()) {
-        newErrors.travel_purpose = t('apply.errPurpose');
-      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -170,6 +167,7 @@ export const ApplyPass = () => {
       const payload = {
         ...formData,
         proposed_route: formData.proposed_route || `${formData.departure_location} → ${formData.destination}`,
+        travel_purpose: formData.travel_purpose || `Emergency relief delivery: ${formData.cargo_type} (${formData.departure_location} to ${formData.destination})`,
         vehicle_owner: formData.vehicle_owner || formData.org_name,
         emergency_contact: formData.emergency_contact || formData.applicant_phone,
       };
@@ -712,31 +710,6 @@ export const ApplyPass = () => {
                 <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>{fieldErrors.cargo_details}</span>
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                {t('apply.purpose')} <span className="text-[#CC1424]">*</span>
-              </label>
-              <textarea
-                required
-                rows={2}
-                name="travel_purpose"
-                value={formData.travel_purpose}
-                onChange={handleChange}
-                placeholder={t('apply.placeholderPurpose')}
-                className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
-                  fieldErrors.travel_purpose
-                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                    : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
-                }`}
-              />
-              {fieldErrors.travel_purpose && (
-                <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
-                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span>{fieldErrors.travel_purpose}</span>
                 </p>
               )}
             </div>

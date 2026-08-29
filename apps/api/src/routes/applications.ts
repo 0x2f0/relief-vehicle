@@ -20,7 +20,6 @@ applications.post('/', async (c) => {
     { key: 'departure_location', label: 'Departure Location' },
     { key: 'destination', label: 'Destination' },
     { key: 'cargo_details', label: 'Cargo Details' },
-    { key: 'travel_purpose', label: 'Travel Purpose' },
   ];
 
   for (const field of requiredFields) {
@@ -30,6 +29,7 @@ applications.post('/', async (c) => {
   }
 
   const proposedRoute = (body.proposed_route || `${body.departure_location} → ${body.destination}`).trim();
+  const travelPurpose = (body.travel_purpose || `Emergency relief delivery: ${body.cargo_type || 'Relief Goods'}`).trim();
   
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const randomStr = crypto.randomUUID().slice(0, 4).toUpperCase();
@@ -69,7 +69,7 @@ applications.post('/', async (c) => {
       body.departure_time ?? '',
       body.return_time ?? '',
       proposedRoute,
-      body.travel_purpose ?? '',
+      travelPurpose,
       body.cargo_type ?? '',
       body.cargo_details ?? '',
       body.supporting_documents ? (typeof body.supporting_documents === 'string' ? body.supporting_documents : JSON.stringify(body.supporting_documents)) : null,
