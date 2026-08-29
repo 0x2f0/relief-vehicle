@@ -17,6 +17,7 @@ import {
   Trash2,
   X,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { LocationCombobox } from '../components/common/LocationCombobox';
 
@@ -50,6 +51,8 @@ export const RoadConditions = () => {
     };
   }, []);
 
+  const [formError, setFormError] = useState('');
+
   // TanStack Query Mutations
   const addMutation = useMutation({
     mutationFn: addRoadCondition,
@@ -58,9 +61,10 @@ export const RoadConditions = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.publicStats });
       setShowAddModal(false);
       setNewRoad({ road_name: '', status: 'restricted', description: '' });
+      setFormError('');
     },
     onError: (err: any) => {
-      alert(err.message || 'Failed to publish road advisory');
+      setFormError(err.message || 'Failed to publish road advisory');
     },
   });
 
@@ -77,7 +81,11 @@ export const RoadConditions = () => {
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newRoad.road_name.trim()) return;
+    setFormError('');
+    if (!newRoad.road_name.trim()) {
+      setFormError('Please select or specify a road/corridor name');
+      return;
+    }
     addMutation.mutate(newRoad);
   };
 
@@ -320,6 +328,12 @@ export const RoadConditions = () => {
             </div>
 
             <form onSubmit={handleAddSubmit} className="space-y-3.5 text-xs sm:text-sm">
+              {formError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-[#CC1424] flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {t('roads.roadNameLabel')} <span className="text-[#CC1424]">*</span>

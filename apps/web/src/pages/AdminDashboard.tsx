@@ -444,7 +444,18 @@ export const AdminDashboard: React.FC = () => {
   // Member User handlers (Superuser only)
   const handleAddUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUser.username || !newUser.password) return;
+    if (!newUser.username.trim() || newUser.username.trim().length < 3) {
+      alert('Username must be at least 3 characters');
+      return;
+    }
+    if (!newUser.password || newUser.password.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    if (!newUser.full_name.trim()) {
+      alert('Please enter officer full name');
+      return;
+    }
     setActionLoading(true);
     try {
       await addAdminUser(newUser);

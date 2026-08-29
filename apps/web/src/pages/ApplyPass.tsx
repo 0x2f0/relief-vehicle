@@ -12,6 +12,7 @@ export const ApplyPass = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     applicant_name: '',
@@ -40,10 +41,22 @@ export const ApplyPass = () => {
     is_emergency: false,
   });
 
+  const isValidPhone = (phone: string): boolean => {
+    const cleaned = phone.replace(/[\s\-()]/g, '');
+    return /^(?:(?:\+977)|0)?[9][6-8]\d{8}$|^[0-9]{7,10}$/.test(cleaned);
+  };
+
+  const isValidEmail = (email: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
+    setError('');
+    setFieldErrors((prev) => ({ ...prev, [name]: '' }));
+
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
@@ -56,56 +69,85 @@ export const ApplyPass = () => {
   };
 
   const validateStep = (currentStep: number): boolean => {
-    setError('');
+    const newErrors: Record<string, string> = {};
+
     if (currentStep === 1) {
       if (!formData.applicant_name.trim()) {
-        setError(t('apply.errApplicantName'));
-        return false;
+        newErrors.applicant_name = t('apply.errApplicantName');
       }
       if (!formData.applicant_phone.trim()) {
-        setError(t('apply.errPhone'));
-        return false;
+        newErrors.applicant_phone = t('apply.errPhone');
+      } else if (!isValidPhone(formData.applicant_phone)) {
+        newErrors.applicant_phone = t('apply.errInvalidPhone');
+      }
+      if (formData.applicant_email.trim() && !isValidEmail(formData.applicant_email.trim())) {
+        newErrors.applicant_email = t('apply.errInvalidEmail');
+      }
+      if (formData.emergency_contact.trim() && !isValidPhone(formData.emergency_contact)) {
+        newErrors.emergency_contact = t('apply.errInvalidPhone');
       }
       if (!formData.org_name.trim()) {
-        setError(t('apply.errOrg'));
-        return false;
+        newErrors.org_name = t('apply.errOrg');
       }
     } else if (currentStep === 2) {
       if (!formData.vehicle_number.trim()) {
-        setError(t('apply.errVehicleNo'));
-        return false;
+        newErrors.vehicle_number = t('apply.errVehicleNo');
+      } else if (formData.vehicle_number.trim().length < 3) {
+        newErrors.vehicle_number = t('apply.errInvalidVehicleNo');
       }
       if (!formData.driver_name.trim()) {
-        setError(t('apply.errDriverName'));
-        return false;
+        newErrors.driver_name = t('apply.errDriverName');
       }
       if (!formData.driver_phone.trim()) {
-        setError(t('apply.errDriverPhone'));
-        return false;
+        newErrors.driver_phone = t('apply.errDriverPhone');
+      } else if (!isValidPhone(formData.driver_phone)) {
+        newErrors.driver_phone = t('apply.errInvalidPhone');
+      }
+      if (Number(formData.passenger_count) < 1) {
+        newErrors.passenger_count = t('apply.errPassengerCount');
       }
     } else if (currentStep === 3) {
       if (!formData.departure_location.trim()) {
-        setError(t('apply.errFrom'));
-        return false;
+        newErrors.departure_location = t('apply.errFrom');
       }
       if (!formData.destination.trim()) {
-        setError(t('apply.errTo'));
-        return false;
+        newErrors.destination = t('apply.errTo');
+      }
+      if (
+        formData.departure_location.trim() &&
+        formData.destination.trim() &&
+        formData.departure_location.trim().toLowerCase() === formData.destination.trim().toLowerCase()
+      ) {
+        newErrors.destination = t('apply.errSameLocation');
       }
       if (!formData.proposed_route.trim()) {
-        setError(t('apply.errRoute'));
-        return false;
+        newErrors.proposed_route = t('apply.errRoute');
+      }
+      if (!formData.departure_time) {
+        newErrors.departure_time = t('apply.errDepartureTime');
+      }
+      if (formData.departure_time && formData.return_time) {
+        if (new Date(formData.return_time) < new Date(formData.departure_time)) {
+          newErrors.return_time = t('apply.errInvalidReturnTime');
+        }
       }
     } else if (currentStep === 4) {
-      if (!formData.travel_purpose.trim()) {
-        setError(t('apply.errPurpose'));
-        return false;
-      }
       if (!formData.cargo_details.trim()) {
-        setError(t('apply.errCargo'));
-        return false;
+        newErrors.cargo_details = t('apply.errCargo');
+      }
+      if (!formData.travel_purpose.trim()) {
+        newErrors.travel_purpose = t('apply.errPurpose');
       }
     }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      setError(Object.values(newErrors)[0]);
+      return false;
+    }
+
+    setFieldErrors({});
+    setError('');
     return true;
   };
 
@@ -229,8 +271,18 @@ export const ApplyPass = () => {
                   value={formData.applicant_name}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderName')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.applicant_name
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.applicant_name && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.applicant_name}</span>
+                  </p>
+                )}
               </div>
 
               <div>
@@ -244,8 +296,18 @@ export const ApplyPass = () => {
                   value={formData.applicant_phone}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderPhone')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.applicant_phone
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.applicant_phone && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.applicant_phone}</span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -260,8 +322,18 @@ export const ApplyPass = () => {
                   value={formData.applicant_email}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderEmail')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.applicant_email
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.applicant_email && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.applicant_email}</span>
+                  </p>
+                )}
               </div>
 
               <div>
@@ -274,8 +346,18 @@ export const ApplyPass = () => {
                   value={formData.emergency_contact}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderEmergencyContact')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.emergency_contact
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.emergency_contact && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.emergency_contact}</span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -291,8 +373,18 @@ export const ApplyPass = () => {
                   value={formData.org_name}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderOrg')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.org_name
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.org_name && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.org_name}</span>
+                  </p>
+                )}
               </div>
 
               <div>
@@ -333,8 +425,18 @@ export const ApplyPass = () => {
                   value={formData.vehicle_number}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderVehicleNo')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm uppercase font-mono font-bold tracking-wider focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm uppercase font-mono font-bold tracking-wider transition-colors bg-white ${
+                    fieldErrors.vehicle_number
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.vehicle_number && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.vehicle_number}</span>
+                  </p>
+                )}
               </div>
 
               <div>
@@ -369,8 +471,18 @@ export const ApplyPass = () => {
                   value={formData.driver_name}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderDriverName')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.driver_name
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.driver_name && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.driver_name}</span>
+                  </p>
+                )}
               </div>
 
               <div>
@@ -384,8 +496,18 @@ export const ApplyPass = () => {
                   value={formData.driver_phone}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderDriverPhone')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.driver_phone
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.driver_phone && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.driver_phone}</span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -401,8 +523,18 @@ export const ApplyPass = () => {
                   name="passenger_count"
                   value={formData.passenger_count}
                   onChange={handleChange}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.passenger_count
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.passenger_count && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.passenger_count}</span>
+                  </p>
+                )}
               </div>
 
               <div>
@@ -430,28 +562,50 @@ export const ApplyPass = () => {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {t('apply.from')} <span className="text-[#CC1424]">*</span>
                 </label>
-                <LocationCombobox
-                  required
-                  name="departure_location"
-                  value={formData.departure_location}
-                  onChange={(val) => setFormData((prev) => ({ ...prev, departure_location: val }))}
-                  placeholder={t('apply.placeholderFrom')}
-                  categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
-                />
+                <div className={fieldErrors.departure_location ? 'ring-1 ring-red-400 rounded-lg' : ''}>
+                  <LocationCombobox
+                    required
+                    name="departure_location"
+                    value={formData.departure_location}
+                    onChange={(val) => {
+                      setFormData((prev) => ({ ...prev, departure_location: val }));
+                      setFieldErrors((prev) => ({ ...prev, departure_location: '' }));
+                    }}
+                    placeholder={t('apply.placeholderFrom')}
+                    categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
+                  />
+                </div>
+                {fieldErrors.departure_location && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.departure_location}</span>
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {t('apply.to')} <span className="text-[#CC1424]">*</span>
                 </label>
-                <LocationCombobox
-                  required
-                  name="destination"
-                  value={formData.destination}
-                  onChange={(val) => setFormData((prev) => ({ ...prev, destination: val }))}
-                  placeholder={t('apply.placeholderTo')}
-                  categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
-                />
+                <div className={fieldErrors.destination ? 'ring-1 ring-red-400 rounded-lg' : ''}>
+                  <LocationCombobox
+                    required
+                    name="destination"
+                    value={formData.destination}
+                    onChange={(val) => {
+                      setFormData((prev) => ({ ...prev, destination: val }));
+                      setFieldErrors((prev) => ({ ...prev, destination: '' }));
+                    }}
+                    placeholder={t('apply.placeholderTo')}
+                    categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
+                  />
+                </div>
+                {fieldErrors.destination && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.destination}</span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -459,14 +613,25 @@ export const ApplyPass = () => {
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 {t('apply.route')} <span className="text-[#CC1424]">*</span>
               </label>
-              <LocationCombobox
-                required
-                name="proposed_route"
-                value={formData.proposed_route}
-                onChange={(val) => setFormData((prev) => ({ ...prev, proposed_route: val }))}
-                placeholder={t('apply.placeholderRoute')}
-                categories={['Highway', 'City / Hub', 'Checkpoint']}
-              />
+              <div className={fieldErrors.proposed_route ? 'ring-1 ring-red-400 rounded-lg' : ''}>
+                <LocationCombobox
+                  required
+                  name="proposed_route"
+                  value={formData.proposed_route}
+                  onChange={(val) => {
+                    setFormData((prev) => ({ ...prev, proposed_route: val }));
+                    setFieldErrors((prev) => ({ ...prev, proposed_route: '' }));
+                  }}
+                  placeholder={t('apply.placeholderRoute')}
+                  categories={['Highway', 'City / Hub', 'Checkpoint']}
+                />
+              </div>
+              {fieldErrors.proposed_route && (
+                <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>{fieldErrors.proposed_route}</span>
+                </p>
+              )}
             </div>
 
             <div>
@@ -494,8 +659,18 @@ export const ApplyPass = () => {
                   name="departure_time"
                   value={formData.departure_time}
                   onChange={handleChange}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.departure_time
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.departure_time && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.departure_time}</span>
+                  </p>
+                )}
               </div>
 
               <div>
@@ -507,8 +682,18 @@ export const ApplyPass = () => {
                   name="return_time"
                   value={formData.return_time}
                   onChange={handleChange}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                    fieldErrors.return_time
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                  }`}
                 />
+                {fieldErrors.return_time && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.return_time}</span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -553,8 +738,18 @@ export const ApplyPass = () => {
                 value={formData.cargo_details}
                 onChange={handleChange}
                 placeholder={t('apply.placeholderCargoDetails')}
-                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  fieldErrors.cargo_details
+                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                    : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                }`}
               />
+              {fieldErrors.cargo_details && (
+                <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>{fieldErrors.cargo_details}</span>
+                </p>
+              )}
             </div>
 
             <div>
@@ -568,8 +763,18 @@ export const ApplyPass = () => {
                 value={formData.travel_purpose}
                 onChange={handleChange}
                 placeholder={t('apply.placeholderPurpose')}
-                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  fieldErrors.travel_purpose
+                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
+                    : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                }`}
               />
+              {fieldErrors.travel_purpose && (
+                <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>{fieldErrors.travel_purpose}</span>
+                </p>
+              )}
             </div>
           </div>
         )}

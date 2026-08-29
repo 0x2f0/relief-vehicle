@@ -8,6 +8,27 @@ const applications = new Hono<{ Bindings: Bindings }>();
 applications.post('/', async (c) => {
   const body = await c.req.json();
   const db = getDbClient(c.env);
+
+  // Server-side validation
+  const requiredFields: Array<{ key: string; label: string }> = [
+    { key: 'applicant_name', label: 'Applicant Name' },
+    { key: 'applicant_phone', label: 'Applicant Phone' },
+    { key: 'org_name', label: 'Organization Name' },
+    { key: 'vehicle_number', label: 'Vehicle Number' },
+    { key: 'driver_name', label: 'Driver Name' },
+    { key: 'driver_phone', label: 'Driver Phone' },
+    { key: 'departure_location', label: 'Departure Location' },
+    { key: 'destination', label: 'Destination' },
+    { key: 'proposed_route', label: 'Proposed Route' },
+    { key: 'cargo_details', label: 'Cargo Details' },
+    { key: 'travel_purpose', label: 'Travel Purpose' },
+  ];
+
+  for (const field of requiredFields) {
+    if (!body[field.key] || !String(body[field.key]).trim()) {
+      return c.json({ error: `Please provide ${field.label}` }, 400);
+    }
+  }
   
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const randomStr = crypto.randomUUID().slice(0, 4).toUpperCase();
