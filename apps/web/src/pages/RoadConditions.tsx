@@ -18,6 +18,7 @@ import {
   X,
   Loader2,
 } from 'lucide-react';
+import { LocationCombobox } from '../components/common/LocationCombobox';
 
 export const RoadConditions = () => {
   const { t } = useI18n();
@@ -323,13 +324,12 @@ export const RoadConditions = () => {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {t('roads.roadNameLabel')} <span className="text-[#CC1424]">*</span>
                 </label>
-                <input
+                <LocationCombobox
                   required
-                  type="text"
                   value={newRoad.road_name}
-                  onChange={(e) => setNewRoad({ ...newRoad, road_name: e.target.value })}
+                  onChange={(val) => setNewRoad((prev) => ({ ...prev, road_name: val }))}
                   placeholder="उदा: Araniko Highway (Dolalghat - Melamchi Section)"
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-xs sm:text-sm focus:border-[#CC1424]"
+                  categories={['Highway', 'Checkpoint', 'City / Hub', 'District']}
                 />
               </div>
 

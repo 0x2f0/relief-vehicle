@@ -13,13 +13,20 @@ admin.get('/applications', async (c) => {
   const db = getDbClient(c.env);
   const status = c.req.query('status');
   
-  let sql = 'SELECT * FROM applications';
-  const args = [];
-  
-  if (status) {
-    sql += ' WHERE status = ?';
-    args.push(status);
-  }
+  let sql = `
+    SELECT * FROM applications
+    ${status ? 'WHERE status = ?' : ''}
+    ORDER BY 
+      CASE 
+        WHEN priority = 'Critical' THEN 1
+        WHEN priority = 'High' THEN 2
+        WHEN priority = 'Medium' THEN 3
+        ELSE 4
+      END ASC,
+      datetime(created_at) DESC,
+      created_at DESC
+  `;
+  const args = status ? [status] : [];
   
   try {
     const res = await db.execute({ sql, args });

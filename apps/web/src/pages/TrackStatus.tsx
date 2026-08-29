@@ -187,11 +187,11 @@ export const TrackStatus = () => {
               type="text"
               required
               value={inputCode}
-              onChange={(e) => setInputCode(e.target.value)}
+              onChange={(e) => setInputCode(e.target.value.toUpperCase())}
               placeholder={t('track.placeholder')}
               autoCapitalize="characters"
               autoComplete="off"
-              className="w-full pl-8 pr-3 py-2.5 text-xs font-mono border border-slate-300 rounded-xl focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+              className="w-full pl-8 pr-3 py-2.5 text-xs font-mono uppercase border border-slate-300 rounded-xl focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white font-bold"
             />
           </label>
 

@@ -84,9 +84,22 @@ const translations: Record<Locale, Record<string, string>> = {
     'apply.email': 'इमेल ठेगाना',
     'apply.org': 'संस्था वा समूहको नाम',
     'apply.orgType': 'संस्थाको प्रकार',
+    'apply.orgTypeRescue': 'उद्धार टोली (Rescue Team)',
+    'apply.orgTypeMedical': 'स्वास्थ्य तथा चिकित्सा टोली (Medical Team)',
+    'apply.orgTypeGov': 'सरकारी निकाय (Government Agency)',
+    'apply.orgTypeRelief': 'राहत संस्था (Relief Organization)',
+    'apply.orgTypeVolunteer': 'स्वयंसेवक समूह (Volunteer Group)',
+    'apply.orgTypeLogistics': 'अत्यावश्यक ढुवानी (Essential Logistics)',
+    'apply.orgTypeMedia': 'सञ्चार माध्यम (Media)',
     'apply.orgId': 'दर्ता नम्बर / परिचयपत्र नं (ऐच्छिक)',
     'apply.vehicleNo': 'सवारी दर्ता नम्बर (उदा: बा २ ख १२३४)',
     'apply.vehicleType': 'सवारी साधनको प्रकार',
+    'apply.vehicleTypeAmbulance': 'एम्बुलेन्स (Ambulance)',
+    'apply.vehicleTypeTruck': 'ट्रक (Truck)',
+    'apply.vehicleTypePickup': 'पिकअप (Pickup)',
+    'apply.vehicleTypeJeep': 'जिप / एसयूभी (Jeep / SUV)',
+    'apply.vehicleTypeBus': 'बस (Bus)',
+    'apply.vehicleTypeBoat': 'डुङ्गा / विशेष साधन (Boat / Special)',
     'apply.vehicleOwner': 'सवारी धनी / संस्था',
     'apply.driverName': 'चालकको पूरा नाम',
     'apply.driverPhone': 'चालकको मोबाइल नम्बर',
@@ -101,6 +114,18 @@ const translations: Record<Locale, Record<string, string>> = {
     'apply.route': 'प्रस्तावित राजमार्ग / करिडोर',
     'apply.purpose': 'यात्रा तथा मिसनको मुख्य उद्देश्य',
     'apply.cargo': 'सामग्रीको मुख्य वर्ग',
+    'apply.cargoTypeFood': 'खाद्यान्न तथा पिउने पानी (Relief Food & Water)',
+    'apply.cargoTypeDryRation': 'चामल, दाल, पिठो तथा सुक्खा खाद्यान्न (Dry Rations & Grains)',
+    'apply.cargoTypeReadyFood': 'तयारी खाना तथा चाउचाउ/बिस्कुट (Ready-to-Eat Food)',
+    'apply.cargoTypeWater': 'पिउने पानी तथा शुद्धीकरण सामग्री (Drinking Water & Kits)',
+    'apply.cargoTypeBabyFood': 'शिशु तथा बाल पोषण आहार (Baby Food & Nutrition)',
+    'apply.cargoTypeMedical': 'स्वास्थ्य तथा औषधि सामग्री (Medical Supplies)',
+    'apply.cargoTypeRescue': 'खोजी तथा उद्धार उपकरण (Rescue Equipment)',
+    'apply.cargoTypeShelter': 'त्रिपाल, टेन्ट तथा अस्थायी आवास (Tents & Tarpaulins)',
+    'apply.cargoTypeBlankets': 'कम्बल तथा न्यानो कपडा (Blankets & Warm Clothes)',
+    'apply.cargoTypeHygiene': 'सरसफाइ तथा स्वच्छता सामग्री (Hygiene Kits)',
+    'apply.cargoTypeVolunteer': 'मानवीय स्वयंसेवक तथा प्राविधिक टोली (Volunteers & Personnel)',
+    'apply.cargoTypeEssential': 'अत्यावश्यक ढुवानी तथा आपत्कालीन इन्धन (Essential Logistics & Fuel)',
     'apply.cargoDetails': 'सामग्रीको विस्तृत विवरण (परिमाण सहित)',
     'apply.isEmergency': 'यो आकस्मिक जीवन रक्षा सम्बन्धी मिसन हो',
     'apply.submit': 'आवेदन पेश गर्नुहोस्',
@@ -404,9 +429,22 @@ const translations: Record<Locale, Record<string, string>> = {
     'apply.email': 'Email Address',
     'apply.org': 'Organization / Group Name',
     'apply.orgType': 'Organization Type',
+    'apply.orgTypeRescue': 'Rescue Team',
+    'apply.orgTypeMedical': 'Medical Team',
+    'apply.orgTypeGov': 'Government Agency',
+    'apply.orgTypeRelief': 'Relief Organization',
+    'apply.orgTypeVolunteer': 'Volunteer Group',
+    'apply.orgTypeLogistics': 'Essential Logistics',
+    'apply.orgTypeMedia': 'Media',
     'apply.orgId': 'Registration / ID Number (Optional)',
     'apply.vehicleNo': 'Vehicle Plate Number (e.g. BA 2 KHA 1234)',
     'apply.vehicleType': 'Vehicle Type',
+    'apply.vehicleTypeAmbulance': 'Ambulance',
+    'apply.vehicleTypeTruck': 'Truck',
+    'apply.vehicleTypePickup': 'Pickup',
+    'apply.vehicleTypeJeep': 'Jeep / SUV',
+    'apply.vehicleTypeBus': 'Bus',
+    'apply.vehicleTypeBoat': 'Boat / Special',
     'apply.vehicleOwner': 'Vehicle Owner / Entity',
     'apply.driverName': 'Driver Full Name',
     'apply.driverPhone': 'Driver Mobile Number',
@@ -421,6 +459,18 @@ const translations: Record<Locale, Record<string, string>> = {
     'apply.route': 'Proposed Highways / Corridors',
     'apply.purpose': 'Mission Purpose & Scope',
     'apply.cargo': 'Primary Cargo Classification',
+    'apply.cargoTypeFood': 'Relief Food & Drinking Water',
+    'apply.cargoTypeDryRation': 'Dry Rations & Grains (Rice, Pulses, Flour)',
+    'apply.cargoTypeReadyFood': 'Ready-to-Eat Food & Packaged Meals',
+    'apply.cargoTypeWater': 'Emergency Drinking Water & Purification Kits',
+    'apply.cargoTypeBabyFood': 'Infant Nutrition & Baby Food',
+    'apply.cargoTypeMedical': 'Medical Supplies & First Aid',
+    'apply.cargoTypeRescue': 'Search & Rescue Equipment',
+    'apply.cargoTypeShelter': 'Shelter Kits, Tents & Tarpaulins',
+    'apply.cargoTypeBlankets': 'Blankets & Warm Clothing',
+    'apply.cargoTypeHygiene': 'Hygiene & Sanitation Kits',
+    'apply.cargoTypeVolunteer': 'Humanitarian Volunteers & Personnel',
+    'apply.cargoTypeEssential': 'Essential Logistics & Emergency Fuel',
     'apply.cargoDetails': 'Detailed Cargo Breakdown (Quantities & Items)',
     'apply.isEmergency': 'This is a life-critical emergency mission',
     'apply.submit': 'Submit Application',
@@ -703,7 +753,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       return normalizedTranslations['en'].get(lowerKey)!;
     }
 
-    // 5. Intelligent dot-key fallback formatting (e.g. 'admin.title' -> 'Title', 'admin.review' -> 'Review')
+    // 5. Intelligent dot-key fallback formatting (e.g. 'admin.title' -> 'Title', 'apply.orgTypeRelief' -> 'Org Type Relief')
     if (cleanKey.includes('.')) {
       const parts = cleanKey.split('.');
       const subKey = parts[parts.length - 1];
@@ -711,7 +761,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       if (directSub !== subKey) {
         return directSub;
       }
-      return subKey.charAt(0).toUpperCase() + subKey.slice(1).replace(/_/g, ' ');
+      const spaced = subKey
+        .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+        .replace(/_/g, ' ')
+        .trim();
+      return spaced.charAt(0).toUpperCase() + spaced.slice(1);
     }
 
     // 6. Return original key as fallback

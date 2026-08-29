@@ -7,7 +7,6 @@ import {
   updateApplicationStatus,
   issuePass,
   revokePass,
-  holdApplication,
   requestApplicationInfo,
   getCheckpoints,
   addCheckpoint,
@@ -53,9 +52,9 @@ import {
   Download,
   AlertOctagon,
   HelpCircle,
-  PauseCircle,
   Menu,
 } from 'lucide-react';
+import { LocationCombobox } from '../components/common/LocationCombobox';
 
 export const AdminDashboard: React.FC = () => {
   const { t } = useI18n();
@@ -118,13 +117,11 @@ export const AdminDashboard: React.FC = () => {
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showRevokeModal, setShowRevokeModal] = useState(false);
-  const [showHoldModal, setShowHoldModal] = useState(false);
   const [showRequestInfoModal, setShowRequestInfoModal] = useState(false);
 
   // Modal input fields
   const [rejectReason, setRejectReason] = useState('');
   const [revokeReason, setRevokeReason] = useState('');
-  const [holdNotes, setHoldNotes] = useState('');
   const [infoRequestReason, setInfoRequestReason] = useState('');
   const [issueValidUntilDays, setIssueValidUntilDays] = useState(3);
   const [issueApprovedRoute, setIssueApprovedRoute] = useState('');
@@ -395,23 +392,6 @@ export const AdminDashboard: React.FC = () => {
       setSelectedApp({ ...selectedApp, status: 'revoked' });
     } catch (err: any) {
       alert(err.message || 'Pass revocation failed');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleHoldSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedApp) return;
-    setActionLoading(true);
-    try {
-      await holdApplication(selectedApp.id, holdNotes || 'Application held pending highway clearance assessment');
-      setShowHoldModal(false);
-      setHoldNotes('');
-      await fetchApplicationsData();
-      setSelectedApp({ ...selectedApp, status: 'held' });
-    } catch (err: any) {
-      alert(err.message || 'Failed to hold application');
     } finally {
       setActionLoading(false);
     }
@@ -715,28 +695,60 @@ export const AdminDashboard: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  // Filtered applications
-  const filteredApps = applications.filter((app) => {
-    const matchesStatus =
-      statusFilter === 'all'
-        ? true
-        : statusFilter === 'critical'
-        ? app.priority === 'Critical'
-        : app.status === statusFilter;
+  const getPriorityWeight = (p?: string) => {
+    switch (p) {
+      case 'Critical':
+        return 1;
+      case 'High':
+        return 2;
+      case 'Medium':
+        return 3;
+      case 'Normal':
+        return 4;
+      default:
+        return 5;
+    }
+  };
 
-    const matchesPriority = priorityFilter === 'all' || (app.priority && app.priority.toLowerCase() === priorityFilter.toLowerCase());
-    const matchesSearch =
-      searchQuery === '' ||
-      app.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (app.org_name && app.org_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (app.applicant_name && app.applicant_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (app.vehicle_number && app.vehicle_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (app.driver_name && app.driver_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (app.destination && app.destination.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (app.proposed_route && app.proposed_route.toLowerCase().includes(searchQuery.toLowerCase()));
+  const sortApplications = (list: Application[]) => {
+    return [...list].sort((a, b) => {
+      const weightA = getPriorityWeight(a.priority);
+      const weightB = getPriorityWeight(b.priority);
+      if (weightA !== weightB) {
+        return weightA - weightB;
+      }
+      const timeA = new Date(a.created_at || 0).getTime();
+      const timeB = new Date(b.created_at || 0).getTime();
+      return timeB - timeA;
+    });
+  };
 
-    return matchesStatus && matchesPriority && matchesSearch;
-  });
+  const sortedApplications = sortApplications(applications);
+
+  // Filtered applications sorted: highest priority first, latest submission first
+  const filteredApps = sortApplications(
+    applications.filter((app) => {
+      const matchesStatus =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'critical'
+          ? app.priority === 'Critical'
+          : app.status === statusFilter;
+
+      const matchesPriority = priorityFilter === 'all' || (app.priority && app.priority.toLowerCase() === priorityFilter.toLowerCase());
+      const matchesSearch =
+        searchQuery === '' ||
+        app.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (app.org_name && app.org_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (app.applicant_name && app.applicant_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (app.vehicle_number && app.vehicle_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (app.driver_name && app.driver_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (app.destination && app.destination.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (app.proposed_route && app.proposed_route.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      return matchesStatus && matchesPriority && matchesSearch;
+    })
+  );
 
   // Metrics
   const totalAppsCount = applications.length;
@@ -1255,7 +1267,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
 
                   <div className="divide-y divide-slate-100">
-                    {applications.slice(0, 4).map((app) => (
+                    {sortedApplications.slice(0, 5).map((app) => (
                       <div key={app.id} className="py-3 flex items-center justify-between gap-3 text-xs">
                         <div className="space-y-1">
                           <div className="flex items-center space-x-2">
@@ -2259,7 +2271,7 @@ export const AdminDashboard: React.FC = () => {
       </main>
 
       {/* MODAL 1: APPLICATION MANIFEST & REVIEW DRAWER */}
-      {selectedApp && !showIssueModal && !showRejectModal && !showRevokeModal && !showHoldModal && !showRequestInfoModal && (
+      {selectedApp && !showIssueModal && !showRejectModal && !showRevokeModal && !showRequestInfoModal && (
         <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 space-y-5 max-h-[92vh] overflow-y-auto">
             {/* Header */}
@@ -2350,27 +2362,19 @@ export const AdminDashboard: React.FC = () => {
                   <>
                     <button
                       type="button"
-                      onClick={() => setShowRequestInfoModal(true)}
-                      className="px-3 py-1.5 bg-blue-50 text-[#033685] border border-blue-200 rounded-lg text-xs font-bold hover:bg-blue-100 flex items-center space-x-1"
-                    >
-                      <HelpCircle className="w-3.5 h-3.5" />
-                      <span>{t('admin.requestInfo')}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowHoldModal(true)}
-                      className="px-3 py-1.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-lg text-xs font-bold hover:bg-orange-100 flex items-center space-x-1"
-                    >
-                      <PauseCircle className="w-3.5 h-3.5" />
-                      <span>{t('admin.hold')}</span>
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => setShowRejectModal(true)}
                       className="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold hover:bg-rose-100 flex items-center space-x-1"
                     >
                       <Ban className="w-3.5 h-3.5" />
                       <span>{t('admin.reject')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowRequestInfoModal(true)}
+                      className="px-3 py-1.5 bg-blue-50 text-[#033685] border border-blue-200 rounded-lg text-xs font-bold hover:bg-blue-100 flex items-center space-x-1"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>{t('admin.requestInfo')}</span>
                     </button>
                   </>
                 )}
@@ -2475,12 +2479,11 @@ export const AdminDashboard: React.FC = () => {
                 <label className="block font-semibold text-slate-700 mb-1">
                   अधिकृत यात्रा करिडोर (Authorized Corridor)
                 </label>
-                <input
-                  type="text"
+                <LocationCombobox
                   value={issueApprovedRoute}
-                  onChange={(e) => setIssueApprovedRoute(e.target.value)}
+                  onChange={(val) => setIssueApprovedRoute(val)}
                   placeholder="उदा: Araniko Highway -> Dolalghat -> Melamchi"
-                  className="w-full border border-slate-300 rounded-lg p-2"
+                  categories={['Highway', 'Checkpoint', 'City / Hub', 'District']}
                 />
               </div>
 
@@ -2573,43 +2576,6 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL 5: HOLD APPLICATION MODAL */}
-      {showHoldModal && selectedApp && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
-            <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-              <PauseCircle className="w-5 h-5 text-orange-600" />
-              <span>आवेदन होल्डमा राख्नुहोस् (Hold Application)</span>
-            </h3>
-            <form onSubmit={handleHoldSubmit} className="space-y-3">
-              <textarea
-                required
-                rows={3}
-                value={holdNotes}
-                onChange={(e) => setHoldNotes(e.target.value)}
-                placeholder="करिडोर सुरक्षा निरीक्षण, मौसम सुधार, वा समन्वय पर्खिरहेको कारण..."
-                className="w-full border border-slate-300 rounded-lg p-3 text-xs focus:border-orange-600"
-              />
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowHoldModal(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold"
-                >
-                  रद्द गर्नुहोस्
-                </button>
-                <button
-                  type="submit"
-                  disabled={actionLoading}
-                  className="px-4 py-2 rounded-lg bg-orange-600 text-white text-xs font-bold hover:bg-orange-700"
-                >
-                  {actionLoading ? 'Saving...' : 'होल्ड गर्नुहोस् (Put on Hold)'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* MODAL 6: REQUEST INFO MODAL */}
       {showRequestInfoModal && selectedApp && (
@@ -2878,13 +2844,12 @@ export const AdminDashboard: React.FC = () => {
                 <label className="block font-semibold text-slate-700 mb-1">
                   {t('roads.roadNameLabel')} <span className="text-[#CC1424]">*</span>
                 </label>
-                <input
+                <LocationCombobox
                   required
-                  type="text"
                   value={newRoad.road_name}
-                  onChange={(e) => setNewRoad({ ...newRoad, road_name: e.target.value })}
+                  onChange={(val) => setNewRoad((prev) => ({ ...prev, road_name: val }))}
                   placeholder="उदा: Araniko Highway (Dolalghat - Melamchi Section)"
-                  className="w-full border border-slate-300 rounded-lg p-2.5"
+                  categories={['Highway', 'Checkpoint', 'City / Hub', 'District']}
                 />
               </div>
 

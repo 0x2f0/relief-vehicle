@@ -133,10 +133,10 @@ export const Header = () => {
                   title="Admin Dashboard"
                 >
                   <div className="w-5 h-5 rounded-full bg-[#0447AF] text-white flex items-center justify-center text-[10px] font-black uppercase shadow-xs">
-                    {adminUser.username.charAt(0)}
+                    {(adminUser.username || 'A').replace(/[{}"\\]/g, '').trim().charAt(0) || 'A'}
                   </div>
-                  <span className="max-w-[90px] truncate text-[#033685] font-medium hidden sm:inline">
-                    {adminUser.username}
+                  <span className="max-w-[100px] truncate text-[#033685] font-medium hidden sm:inline">
+                    {(adminUser.username || 'Admin').replace(/[{}"\\]/g, '').trim() || 'Admin'}
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                 </Link>
@@ -200,9 +200,9 @@ export const Header = () => {
                 className="flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-[#033685] bg-blue-50"
               >
                 <div className="w-5 h-5 rounded-full bg-[#0447AF] text-white flex items-center justify-center text-xs font-bold uppercase">
-                  {adminUser.username.charAt(0)}
+                  {(adminUser.username || 'A').replace(/[{}"\\]/g, '').trim().charAt(0) || 'A'}
                 </div>
-                <span>{adminUser.username} ({t('nav.admin')})</span>
+                <span>{(adminUser.username || 'Admin').replace(/[{}"\\]/g, '').trim() || 'Admin'} ({t('nav.admin')})</span>
               </Link>
               <button
                 type="button"

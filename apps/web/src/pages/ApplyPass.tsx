@@ -4,6 +4,7 @@ import { useI18n } from '../lib/i18n';
 import { submitApplication } from '../lib/api';
 import { saveStoredPass } from '../lib/authTracker';
 import { FileText, Truck, MapPin, Package, Check, ArrowRight, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { LocationCombobox } from '../components/common/LocationCombobox';
 
 export const ApplyPass = () => {
   const { t } = useI18n();
@@ -49,7 +50,8 @@ export const ApplyPass = () => {
     } else if (type === 'number') {
       setFormData((prev) => ({ ...prev, [name]: parseInt(value, 10) || 0 }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      const finalValue = name === 'vehicle_number' ? value.toUpperCase() : value;
+      setFormData((prev) => ({ ...prev, [name]: finalValue }));
     }
   };
 
@@ -331,7 +333,7 @@ export const ApplyPass = () => {
                   value={formData.vehicle_number}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderVehicleNo')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white font-mono"
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm uppercase font-mono font-bold tracking-wider focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
                 />
               </div>
 
@@ -428,14 +430,13 @@ export const ApplyPass = () => {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {t('apply.from')} <span className="text-[#CC1424]">*</span>
                 </label>
-                <input
+                <LocationCombobox
                   required
-                  type="text"
                   name="departure_location"
                   value={formData.departure_location}
-                  onChange={handleChange}
+                  onChange={(val) => setFormData((prev) => ({ ...prev, departure_location: val }))}
                   placeholder={t('apply.placeholderFrom')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
                 />
               </div>
 
@@ -443,14 +444,13 @@ export const ApplyPass = () => {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {t('apply.to')} <span className="text-[#CC1424]">*</span>
                 </label>
-                <input
+                <LocationCombobox
                   required
-                  type="text"
                   name="destination"
                   value={formData.destination}
-                  onChange={handleChange}
+                  onChange={(val) => setFormData((prev) => ({ ...prev, destination: val }))}
                   placeholder={t('apply.placeholderTo')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
                 />
               </div>
             </div>
@@ -459,14 +459,13 @@ export const ApplyPass = () => {
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 {t('apply.route')} <span className="text-[#CC1424]">*</span>
               </label>
-              <input
+              <LocationCombobox
                 required
-                type="text"
                 name="proposed_route"
                 value={formData.proposed_route}
-                onChange={handleChange}
+                onChange={(val) => setFormData((prev) => ({ ...prev, proposed_route: val }))}
                 placeholder={t('apply.placeholderRoute')}
-                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                categories={['Highway', 'City / Hub', 'Checkpoint']}
               />
             </div>
 
@@ -474,13 +473,13 @@ export const ApplyPass = () => {
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 {t('apply.checkpoints')}
               </label>
-              <input
-                type="text"
+              <LocationCombobox
                 name="intermediate_checkpoints"
                 value={formData.intermediate_checkpoints}
-                onChange={handleChange}
+                onChange={(val) => setFormData((prev) => ({ ...prev, intermediate_checkpoints: val }))}
                 placeholder={t('apply.placeholderCheckpoints')}
-                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                categories={['Checkpoint', 'City / Hub', 'District']}
+                isMultiComma={true}
               />
             </div>
 
@@ -526,13 +525,20 @@ export const ApplyPass = () => {
                 name="cargo_type"
                 value={formData.cargo_type}
                 onChange={handleChange}
-                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white font-medium"
               >
-                <option value="Rescue Equipment">{t('apply.cargoTypeRescue')}</option>
-                <option value="Medical Supplies">{t('apply.cargoTypeMedical')}</option>
                 <option value="Relief Food & Water">{t('apply.cargoTypeFood')}</option>
-                <option value="Essential Services">{t('apply.cargoTypeEssential')}</option>
+                <option value="Dry Rations & Grains">{t('apply.cargoTypeDryRation')}</option>
+                <option value="Ready-to-Eat Food">{t('apply.cargoTypeReadyFood')}</option>
+                <option value="Drinking Water & Kits">{t('apply.cargoTypeWater')}</option>
+                <option value="Baby Food & Nutrition">{t('apply.cargoTypeBabyFood')}</option>
+                <option value="Medical Supplies">{t('apply.cargoTypeMedical')}</option>
+                <option value="Rescue Equipment">{t('apply.cargoTypeRescue')}</option>
+                <option value="Tents & Tarpaulins">{t('apply.cargoTypeShelter')}</option>
+                <option value="Blankets & Warm Clothes">{t('apply.cargoTypeBlankets')}</option>
+                <option value="Hygiene Kits">{t('apply.cargoTypeHygiene')}</option>
                 <option value="Humanitarian Volunteers">{t('apply.cargoTypeVolunteer')}</option>
+                <option value="Essential Logistics">{t('apply.cargoTypeEssential')}</option>
               </select>
             </div>
 
@@ -564,19 +570,6 @@ export const ApplyPass = () => {
                 placeholder={t('apply.placeholderPurpose')}
                 className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
               />
-            </div>
-
-            <div className="p-3 bg-red-50/60 rounded-lg border border-red-200">
-              <label className="flex items-center space-x-2 text-xs font-bold text-red-900 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="is_emergency"
-                  checked={formData.is_emergency}
-                  onChange={handleChange}
-                  className="rounded text-[#CC1424] focus:ring-[#CC1424] h-4 w-4"
-                />
-                <span>{t('apply.isEmergency')}</span>
-              </label>
             </div>
           </div>
         )}
