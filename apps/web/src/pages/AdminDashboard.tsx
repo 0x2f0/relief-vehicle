@@ -816,16 +816,16 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-[85vh] bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+    <div className="flex-1 flex flex-col lg:flex-row w-full bg-[#F8FAFC]">
       {/* 1. VERTICAL SIDEBAR NAVIGATION */}
       <aside
-        className={`fixed inset-y-0 left-0 z-[60] w-64 bg-slate-50/80 border-r border-slate-200/80 text-slate-700 flex flex-col justify-between transform transition-transform duration-200 lg:static lg:translate-x-0 lg:max-h-[85vh] ${
+        className={`fixed inset-y-0 left-0 z-[60] w-64 bg-white border-r border-slate-200/80 text-slate-700 flex flex-col justify-between transform transition-transform duration-200 lg:static lg:translate-x-0 lg:sticky lg:top-0 lg:h-[calc(100vh-65px)] flex-shrink-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex flex-col flex-1 min-h-0">
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Active User / Station Info */}
-          <div className="px-4 py-3.5 border-b border-slate-200/70 bg-white/60">
+          <div className="px-4 py-3.5 border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-lg bg-[#0447AF]/10 text-[#0447AF] font-bold flex items-center justify-center text-xs flex-shrink-0">
@@ -1062,7 +1062,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Sidebar Footer & Actions */}
-        <div className="p-3 bg-white/70 border-t border-slate-200/70 flex-shrink-0 flex items-center justify-between">
+        <div className="p-3 bg-slate-50/80 border-t border-slate-100 flex-shrink-0 flex items-center justify-between">
           <button
             type="button"
             onClick={() => {
@@ -1100,7 +1100,7 @@ export const AdminDashboard: React.FC = () => {
       {/* 2. MAIN ADMIN CONTENT WORKSPACE */}
       <main className="flex-1 flex flex-col bg-[#F8FAFC] min-w-0 overflow-hidden">
         {/* Top Command Bar */}
-        <header className="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between flex-shrink-0">
+        <header className="bg-white border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between flex-shrink-0 sticky top-0 z-20">
           <div className="flex items-center space-x-3">
             <button
               type="button"
@@ -1156,7 +1156,7 @@ export const AdminDashboard: React.FC = () => {
         </header>
 
         {/* Dynamic View Canvas */}
-        <div className="flex-1 p-4 sm:p-6 overflow-y-auto max-h-[calc(88vh-55px)] space-y-6">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 w-full max-w-7xl mx-auto overflow-y-auto">
           {/* VIEW 0: COMMAND OVERVIEW & DISPATCH MATRIX */}
           {activeTab === 'overview' && (
             <div className="space-y-6">

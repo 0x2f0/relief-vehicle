@@ -55,15 +55,15 @@ export const Layout = ({ children }: { children?: ReactNode }) => {
       <GlobalLoadingBar />
       <Header />
       <main
-        className={`flex-grow w-full mx-auto ${
+        className={`flex-grow w-full ${
           isAdminView
-            ? 'max-w-[1600px] px-2 sm:px-4 lg:px-6 py-4 sm:py-6'
-            : 'max-w-6xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10'
+            ? 'flex flex-col'
+            : 'max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10'
         }`}
       >
         {children || <Outlet />}
       </main>
-      <Footer />
+      {!isAdminView && <Footer />}
     </div>
   );
 };
