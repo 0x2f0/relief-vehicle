@@ -11,11 +11,11 @@ interface I18nContextType {
 const translations: Record<Locale, Record<string, string>> = {
   ne: {
     // App identity & Header
-    'app.title': 'राहत सवारी ई-पास प्रणाली',
-    'app.subtitle': 'नेपाल सरकार',
-    'app.dept': 'नेपाल सरकार | विपद् प्रतिकार्य तथा राहत समन्वय प्रणाली',
-    'app.description': 'बाढी/विपद् प्रतिकार्य सवारी ई-पास तथा मार्ग समन्वय पोर्टल',
-    'nav.brand': 'नेपाल सरकार राहत ई-पास पोर्टल',
+    'app.title': 'नेपाल विपद् राहत सवारी ई-पास प्रणाली',
+    'app.subtitle': 'Nepal Disaster Relief Vehicle E-Pass System',
+    'app.dept': 'नेपाल विपद् राहत सवारी ई-पास प्रणाली',
+    'app.description': 'विपद् प्रतिकार्य तथा राहत सामग्री ढुवानी सवारी ई-पास पोर्टल',
+    'nav.brand': 'नेपाल विपद् राहत सवारी ई-पास पोर्टल',
 
     // Navigation
     'nav.home': 'गृहपृष्ठ',
@@ -34,10 +34,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'home.notice.text': 'बाढी तथा पहिरो प्रभावित क्षेत्रमा सञ्चालन हुने सम्पूर्ण राहत, उद्धार तथा अत्यावश्यक स्वास्थ्य सामग्री ढुवानी सवारीसाधनका लागि डिजिटल ई-पास अनिवार्य गरिएको छ।',
 
     // Hero Section
-    'home.hero.badge': 'नेपाल सरकार | बाढी प्रतिकार्य आपतकालीन डेस्क',
+    'home.hero.badge': 'नेपाल विपद् राहत सवारी ई-पास प्रणाली',
     'home.hero.title': 'विपद् प्रतिकार्य सवारी ई-पास तथा समन्वय प्रणाली',
-    'home.hero.subtitle': 'प्रभावित जिल्लाहरूमा तत्काल राहत, उद्धार टोली, र स्वास्थ्य सामग्री ढुवानीलाई सहज र व्यवस्थित बनाउन नेपाल सरकारको आधिकारिक ई-पास पोर्टल।',
-    'home.hero.desc': 'प्रभावित जिल्लाहरूमा तत्काल राहत, उद्धार टोली, र स्वास्थ्य सामग्री ढुवानीलाई सहज र व्यवस्थित बनाउन नेपाल सरकारको आधिकारिक ई-पास पोर्टल।',
+    'home.hero.subtitle': 'प्रभावित क्षेत्रहरूमा राहत सामग्री ढुवानी, उद्धार टोली तथा अत्यावश्यक सेवा सवारीलाई सहज र द्रुत अनुमति प्रदान गर्ने प्रणाली।',
+    'home.hero.desc': 'प्रभावित क्षेत्रहरूमा राहत सामग्री ढुवानी, उद्धार टोली तथा अत्यावश्यक सेवा सवारीलाई सहज र द्रुत अनुमति प्रदान गर्ने प्रणाली।',
     'home.hero.applyBtn': 'नयाँ ई-पास आवेदन गर्नुहोस्',
     'home.hero.cta_apply': 'नयाँ ई-पास आवेदन गर्नुहोस्',
     'home.hero.trackBtn': 'आवेदनको स्थिति हेर्नुहोस्',
@@ -273,9 +273,9 @@ const translations: Record<Locale, Record<string, string>> = {
     'scanner.cameraError': 'क्यामरा खोल्न सकिएन। कृपया क्यामरा अनुमति दिनुहोस् वा तस्बिर अपलोड गर्नुहोस्।',
 
     // Admin Login & Dashboard
-    'admin.dept': 'नेपाल सरकार | गृह मन्त्रालय',
+    'admin.dept': 'नेपाल विपद् राहत सवारी ई-पास प्रणाली',
     'admin.title': 'सुरक्षा तथा कमाण्ड नियन्त्रण कक्ष',
-    'admin.subtitle': 'नेपाल सरकार | आपतकालीन राहत सवारी समन्वय तथा ई-पास नियन्त्रण कक्ष',
+    'admin.subtitle': 'नेपाल विपद् राहत सवारी ई-पास प्रणाली | कमाण्ड डेस्क',
     'admin.login': 'प्रशासन तथा कमाण्ड सेन्टर लगइन',
     'admin.subTitle': 'सुरक्षा जाँच तथा समन्वय अधिकारी प्रमाणीकरण पोर्टल',
     'admin.username': 'प्रयोगकर्ता नाम (Username)',
@@ -361,17 +361,17 @@ const translations: Record<Locale, Record<string, string>> = {
     'footer.phone1155': '११५५',
     'footer.phone100_102': '१०० / १०२',
     'footer.copyright': 'सर्वाधिकार सुरक्षित',
-    'footer.powered': 'नेपाल सरकार',
-    'footer.location': 'सिंहदरबार, काठमाडौँ, नेपाल',
-    'footer.gateway': 'नेपाल बाढी प्रतिकार्य ई-पास पोर्टल',
+    'footer.powered': 'नेपाल विपद् राहत सवारी ई-पास प्रणाली',
+    'footer.location': 'काठमाडौँ, नेपाल',
+    'footer.gateway': 'नेपाल विपद् राहत सवारी ई-पास पोर्टल',
   },
   en: {
     // App identity & Header
-    'app.title': 'Relief Vehicle E-Pass System',
-    'app.subtitle': 'Government of Nepal',
-    'app.dept': 'Government of Nepal | Disaster Response & Relief Coordination',
-    'app.description': 'Flood & Disaster Response Vehicle E-Pass & Route Coordination Portal',
-    'nav.brand': 'Government of Nepal Relief E-Pass Portal',
+    'app.title': 'Nepal Disaster Relief Vehicle E-Pass System',
+    'app.subtitle': 'Emergency Transit Coordination',
+    'app.dept': 'Nepal Disaster Relief Vehicle E-Pass System',
+    'app.description': 'Disaster Response Vehicle E-Pass & Route Coordination Portal',
+    'nav.brand': 'Nepal Disaster Relief Vehicle E-Pass Portal',
 
     // Navigation
     'nav.home': 'Home',
@@ -390,10 +390,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'home.notice.text': 'A verified digital E-Pass is mandatory for all relief, rescue, and essential medical transport vehicles operating in disaster-declared zones.',
 
     // Hero Section
-    'home.hero.badge': 'Government of Nepal | Disaster Response Emergency Desk',
-    'home.hero.title': 'Disaster Response Vehicle E-Pass & Fleet Coordination',
-    'home.hero.subtitle': 'Official portal of the Government of Nepal to streamline relief transit, rescue missions, and medical supply corridors during flood emergencies.',
-    'home.hero.desc': 'Official portal of the Government of Nepal to streamline relief transit, rescue missions, and medical supply corridors during flood emergencies.',
+    'home.hero.badge': 'Nepal Disaster Relief Vehicle E-Pass System',
+    'home.hero.title': 'Disaster Response Vehicle E-Pass & Transit Coordination',
+    'home.hero.subtitle': 'Unified portal to streamline disaster relief transit, rescue missions, and medical supply corridors across affected routes.',
+    'home.hero.desc': 'Unified portal to streamline disaster relief transit, rescue missions, and medical supply corridors across affected routes.',
     'home.hero.applyBtn': 'Apply for Movement Pass',
     'home.hero.cta_apply': 'Apply for Movement Pass',
     'home.hero.trackBtn': 'Track Existing Application',
@@ -629,9 +629,9 @@ const translations: Record<Locale, Record<string, string>> = {
     'scanner.cameraError': 'Unable to access camera. Please check permissions or upload an image.',
 
     // Admin Login & Dashboard
-    'admin.dept': 'Government of Nepal | Ministry of Home Affairs',
+    'admin.dept': 'Nepal Disaster Relief Vehicle E-Pass System',
     'admin.title': 'Emergency Command & Control Center',
-    'admin.subtitle': 'Government of Nepal | Emergency Relief Vehicle Coordination & E-Pass Command Desk',
+    'admin.subtitle': 'Nepal Disaster Relief Vehicle E-Pass System | Command Desk',
     'admin.login': 'Duty Administration & Command Portal',
     'admin.subTitle': 'Security Inspection & Relief Coordination Portal',
     'admin.username': 'Username',
@@ -717,9 +717,9 @@ const translations: Record<Locale, Record<string, string>> = {
     'footer.phone1155': '1155',
     'footer.phone100_102': '100 / 102',
     'footer.copyright': 'All Rights Reserved',
-    'footer.powered': 'Government of Nepal',
-    'footer.location': 'Singha Durbar, Kathmandu, Nepal',
-    'footer.gateway': 'Nepal Flood Response E-Pass Gateway',
+    'footer.powered': 'Nepal Disaster Relief Vehicle E-Pass System',
+    'footer.location': 'Kathmandu, Nepal',
+    'footer.gateway': 'Nepal Disaster Relief Vehicle E-Pass Portal',
   },
 };
 

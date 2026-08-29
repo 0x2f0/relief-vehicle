@@ -76,11 +76,10 @@ export const Home = () => {
               <Link
                 to="/apply"
                 preload="intent"
-                className="inline-flex items-center justify-center space-x-2 bg-[#CC1424] hover:bg-[#B00F1E] text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] border border-red-500/30 group"
+                className="inline-flex items-center justify-center space-x-2 bg-[#CC1424] hover:bg-[#B00F1E] text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] border border-red-500/30"
               >
-                <FilePlus className="w-4 h-4 text-white group-hover:rotate-6 transition-transform" />
+                <FilePlus className="w-4 h-4 text-white" />
                 <span>{t('home.hero.applyBtn')}</span>
-                <ArrowRight className="w-4 h-4 text-white/80 group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
 

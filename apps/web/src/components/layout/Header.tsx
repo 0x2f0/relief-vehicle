@@ -3,6 +3,7 @@ import { Link, useRouterState, useNavigate, useRouter } from '@tanstack/react-ro
 import { useI18n } from '../../lib/i18n';
 import { clearAuthSession, getStoredAdminUser } from '../../lib/authSession';
 import { Menu, X, ShieldCheck, AlertCircle, LogOut } from 'lucide-react';
+import { VehicleLogo } from '../common/VehicleLogo';
 
 export const Header = () => {
   const { t, locale, setLocale } = useI18n();
@@ -58,15 +59,11 @@ export const Header = () => {
       {/* Unified Primary Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Brand & Emblem */}
+          {/* Brand & Vehicle Logo */}
           <Link to="/" preload="intent" className="flex items-center space-x-3 text-left focus:outline-none flex-shrink-0">
-            <img
-              src="https://giwmscdnone.gov.np/static/assets/image/Emblem_of_Nepal.png"
-              alt="Government of Nepal Emblem"
-              className="h-11 sm:h-12 w-auto object-contain flex-shrink-0"
-            />
+            <VehicleLogo size="md" />
             <div className="flex flex-col">
-              <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider leading-none">
+              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider leading-none">
                 {t('app.subtitle')}
               </span>
               <span className="text-sm sm:text-base font-bold text-[#0447AF] leading-tight">

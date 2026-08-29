@@ -6,6 +6,7 @@ import { useI18n } from '../lib/i18n';
 import { passQueryOptions } from '../lib/queryClient';
 import { PassSkeleton } from '../components/common/Skeleton';
 import { Printer, Share2, ShieldCheck, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { VehicleLogo } from '../components/common/VehicleLogo';
 
 export const ViewPass = () => {
   const params = useParams({ strict: false }) as { id?: string };
@@ -109,11 +110,7 @@ export const ViewPass = () => {
         {/* Pass Header */}
         <div className="flex items-center justify-between pb-4 border-b-2 border-slate-200">
           <div className="flex items-center space-x-3">
-            <img
-              src="https://giwmscdnone.gov.np/static/assets/image/Emblem_of_Nepal.png"
-              alt="Emblem of Nepal"
-              className="h-14 w-auto object-contain flex-shrink-0"
-            />
+            <VehicleLogo size="lg" />
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
                 {t('app.dept')}

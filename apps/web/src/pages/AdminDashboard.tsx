@@ -19,10 +19,9 @@ import {
   deleteRoadCondition,
   verifyScan,
   recordCheckpointScan,
-  trackApplication,
   api,
 } from '../lib/api';
-import { Application, Pass, RoadCondition, Priority, AuditLog, CoordinationDashboardData } from '../lib/types';
+import { Application, Pass, RoadCondition, Priority, CoordinationDashboardData } from '../lib/types';
 import { clearAuthSession, getAuthToken } from '../lib/authSession';
 import {
   LayoutDashboard,
@@ -33,7 +32,6 @@ import {
   Navigation,
   Building,
   Users,
-  ShieldCheck,
   LogOut,
   RefreshCw,
   CheckCircle2,
@@ -156,12 +154,6 @@ export const AdminDashboard: React.FC = () => {
   const [showAddRoadModal, setShowAddRoadModal] = useState(false);
   const [newRoad, setNewRoad] = useState({ road_name: '', status: 'restricted', description: '' });
 
-  // Audit Logs state
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [auditLoading, setAuditLoading] = useState(false);
-  const [auditEntityFilter, setAuditEntityFilter] = useState('');
-  const [auditSearchQuery, setAuditSearchQuery] = useState('');
-
   // Scanner State
   const [scannerMode, setScannerMode] = useState<'camera' | 'manual' | 'upload'>('manual');
   const [scannerToken, setScannerToken] = useState('');
@@ -180,12 +172,6 @@ export const AdminDashboard: React.FC = () => {
   const animFrameRef = useRef<number | null>(null);
   const [cameraError, setCameraError] = useState('');
   const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
-
-  // Track Application in Admin State
-  const [trackSearchId, setTrackSearchId] = useState('');
-  const [trackedApp, setTrackedApp] = useState<Application | null>(null);
-  const [trackLoading, setTrackLoading] = useState(false);
-  const [trackError, setTrackError] = useState('');
 
   // Fetch all core datasets
   const fetchApplicationsData = async () => {
@@ -256,24 +242,6 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const fetchAuditLogsData = async () => {
-    setAuditLoading(true);
-    try {
-      const res = await api.getAuditLogs({
-        entity_type: auditEntityFilter || undefined,
-        search: auditSearchQuery || undefined,
-      });
-      setAuditLogs(res.logs || []);
-    } catch {
-      setAuditLogs([]);
-      if (!getAuthToken()) {
-        navigate({ to: '/admin/login', replace: true });
-      }
-    } finally {
-      setAuditLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (!getAuthToken()) {
       navigate({ to: '/admin/login', replace: true });
@@ -297,7 +265,6 @@ export const AdminDashboard: React.FC = () => {
     fetchCoordinationData();
     fetchCheckpointsData();
     fetchRoadsData();
-    fetchAuditLogsData();
 
     return () => {
       stopCamera();
@@ -656,27 +623,6 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Track Application in Admin
-  const handleTrackSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!trackSearchId.trim()) return;
-    setTrackLoading(true);
-    setTrackError('');
-    setTrackedApp(null);
-    try {
-      const app = await trackApplication(trackSearchId.trim());
-      if (app) {
-        setTrackedApp(app);
-      } else {
-        throw new Error('Application record not found');
-      }
-    } catch (err: any) {
-      setTrackError(err.message || 'No application found with the provided identifier.');
-    } finally {
-      setTrackLoading(false);
-    }
-  };
-
   // Export applications CSV
   const handleExportCSV = () => {
     const headers = ['ID', 'Priority', 'Status', 'Applicant Name', 'Phone', 'Org Name', 'Vehicle No', 'Vehicle Type', 'Driver Name', 'Departure', 'Destination', 'Cargo Type', 'Created At'];
@@ -767,7 +713,6 @@ export const AdminDashboard: React.FC = () => {
   const criticalOnlyCount = applications.filter((a) => a.priority === 'Critical').length;
   const activePassesCount = applications.filter((a) => a.status === 'issued' || a.status === 'active' || a.status === 'approved').length;
   const pendingCount = applications.filter((a) => a.status === 'submitted' || a.status === 'under_review').length;
-  const rejectedCount = applications.filter((a) => a.status === 'rejected' || a.status === 'revoked').length;
 
   const getPriorityBadge = (priority?: Priority) => {
     if (priority === 'Critical') {
@@ -955,26 +900,9 @@ export const AdminDashboard: React.FC = () => {
                   LIVE
                 </span>
               </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  stopCamera();
-                  setActiveTab('track_status');
-                  setSidebarOpen(false);
-                }}
-                className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors ${
-                  activeTab === 'track_status'
-                    ? 'bg-blue-50 text-[#0447AF] font-bold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
-                }`}
-              >
-                <Search className={`w-4 h-4 ${activeTab === 'track_status' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
-                <span>{t('admin.tabTrack')}</span>
-              </button>
             </div>
 
-            {/* GROUP 2: INFRASTRUCTURE & STATIONS */}
+            {/* GROUP 2: INFRASTRUCTURE & ADMINISTRATION */}
             <div className="space-y-0.5 pt-2.5 border-t border-slate-200/60">
               <button
                 type="button"
@@ -1019,10 +947,7 @@ export const AdminDashboard: React.FC = () => {
                   {checkpoints.length}
                 </span>
               </button>
-            </div>
 
-            {/* GROUP 3: SECURITY & AUDIT */}
-            <div className="space-y-0.5 pt-2.5 border-t border-slate-200/60">
               {isSuperAdmin && (
                 <button
                   type="button"
@@ -1046,34 +971,12 @@ export const AdminDashboard: React.FC = () => {
                   </span>
                 </button>
               )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  stopCamera();
-                  setActiveTab('audit_logs');
-                  setSidebarOpen(false);
-                }}
-                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
-                  activeTab === 'audit_logs'
-                    ? 'bg-blue-50 text-[#0447AF] font-bold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
-                }`}
-              >
-                <div className="flex items-center space-x-2.5">
-                  <ShieldCheck className={`w-4 h-4 ${activeTab === 'audit_logs' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
-                  <span>{t('admin.auditLogs')}</span>
-                </div>
-                <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded font-mono">
-                  {auditLogs.length}
-                </span>
-              </button>
             </div>
           </div>
         </div>
 
         {/* Sidebar Footer & Actions */}
-        <div className="p-3 bg-slate-50/80 border-t border-slate-100 flex-shrink-0 flex items-center justify-between">
+        <div className="p-3 bg-slate-50 border-t border-slate-200/80 flex-shrink-0 flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={() => {
@@ -1081,20 +984,19 @@ export const AdminDashboard: React.FC = () => {
               fetchCoordinationData();
               fetchCheckpointsData();
               fetchRoadsData();
-              fetchAuditLogsData();
             }}
-            className="inline-flex items-center space-x-1.5 text-slate-500 hover:text-slate-900 text-xs font-medium transition-colors"
+            className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 text-xs font-semibold transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading || cpLoading || usersLoading || roadsLoading || coordLoading || auditLoading ? 'animate-spin text-[#0447AF]' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading || cpLoading || usersLoading || roadsLoading || coordLoading ? 'animate-spin text-[#0447AF]' : ''}`} />
             <span>{t('admin.refresh')}</span>
           </button>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="inline-flex items-center space-x-1 text-slate-500 hover:text-[#CC1424] text-xs font-medium transition-colors"
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 text-xs font-bold transition-colors shadow-2xs"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-3.5 h-3.5 text-red-600" />
             <span>{t('admin.logout')}</span>
           </button>
         </div>
@@ -1132,15 +1034,11 @@ export const AdminDashboard: React.FC = () => {
                   ? t('admin.coordination')
                   : activeTab === 'verify_pass'
                   ? t('admin.scanner')
-                  : activeTab === 'track_status'
-                  ? t('admin.track')
                   : activeTab === 'road_conditions'
                   ? t('admin.roads')
                   : activeTab === 'checkpoints'
                   ? t('admin.checkpoints')
-                  : activeTab === 'users'
-                  ? t('admin.users')
-                  : t('admin.auditLogs')}
+                  : t('admin.users')}
               </span>
             </div>
           </div>
@@ -1365,41 +1263,6 @@ export const AdminDashboard: React.FC = () => {
           {/* VIEW 1: MASTER APPLICATIONS & PASSES REVIEW QUEUE */}
           {activeTab === 'all_passes' && (
             <div className="space-y-6">
-              {/* Operations Metric Row */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-1">
-                  <span className="text-slate-500 text-[11px] font-semibold uppercase">{t('admin.metricTotalApplied')}</span>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-black text-slate-900">{totalAppsCount}</span>
-                    <FileText className="w-5 h-5 text-[#0447AF]" />
-                  </div>
-                </div>
-
-                <div className="bg-white p-4 rounded-xl border border-red-200 bg-red-50/20 shadow-2xs space-y-1">
-                  <span className="text-red-700 text-[11px] font-bold uppercase">{t('admin.metricUrgentPriority')}</span>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-black text-red-600">{urgentCount}</span>
-                    <AlertTriangle className="w-5 h-5 text-red-600" />
-                  </div>
-                </div>
-
-                <div className="bg-white p-4 rounded-xl border border-emerald-200 bg-emerald-50/20 shadow-2xs space-y-1">
-                  <span className="text-emerald-700 text-[11px] font-bold uppercase">{t('admin.metricActivePasses')}</span>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-black text-emerald-700">{activePassesCount}</span>
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  </div>
-                </div>
-
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-1">
-                  <span className="text-slate-500 text-[11px] font-semibold uppercase">{t('admin.metricRejected')}</span>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-black text-slate-700">{rejectedCount}</span>
-                    <Ban className="w-5 h-5 text-slate-400" />
-                  </div>
-                </div>
-              </div>
-
               {/* Filter and Search Bar */}
               <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row justify-between gap-3 items-stretch sm:items-center">
                 {/* Status Tabs */}
@@ -1887,73 +1750,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* VIEW 4: APPLICATION STATUS TRACKER */}
-          {activeTab === 'track_status' && (
-            <div className="max-w-2xl mx-auto space-y-6">
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-                <div className="flex items-center space-x-2 pb-3 border-b border-slate-100">
-                  <Search className="w-5 h-5 text-[#0447AF]" />
-                  <h2 className="text-base font-bold text-slate-900">
-                    {t('admin.tabTrack')}
-                  </h2>
-                </div>
 
-                <form onSubmit={handleTrackSearch} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={trackSearchId}
-                    onChange={(e) => setTrackSearchId(e.target.value)}
-                    placeholder="Application ID (e.g. EP-20260829-0DE4)..."
-                    className="flex-1 border border-slate-300 rounded-lg p-2.5 text-xs font-mono focus:border-[#0447AF]"
-                  />
-                  <button
-                    type="submit"
-                    disabled={trackLoading}
-                    className="px-4 py-2.5 bg-[#0447AF] hover:bg-[#033685] text-white rounded-lg text-xs font-bold transition-colors"
-                  >
-                    {trackLoading ? 'खोजी हुँदैछ...' : 'खोज्नुहोस् (Track)'}
-                  </button>
-                </form>
-
-                {trackError && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800">
-                    {trackError}
-                  </div>
-                )}
-
-                {trackedApp && (
-                  <div className="space-y-4 pt-3 border-t border-slate-100">
-                    <div className="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-                      <div>
-                        <span className="font-mono text-xs font-bold text-[#0447AF]">{trackedApp.id}</span>
-                        <h3 className="font-bold text-slate-900 text-sm">{trackedApp.org_name || trackedApp.applicant_name}</h3>
-                      </div>
-                      {getStatusBadge(trackedApp.status)}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50/50 p-3 rounded-xl">
-                      <div><span className="font-semibold text-slate-600">सवारी:</span> <span className="font-mono font-bold">{trackedApp.vehicle_number}</span> ({trackedApp.vehicle_type})</div>
-                      <div><span className="font-semibold text-slate-600">चालक:</span> {trackedApp.driver_name} ({trackedApp.driver_phone})</div>
-                      <div><span className="font-semibold text-slate-600">प्रस्थान:</span> {trackedApp.departure_location}</div>
-                      <div><span className="font-semibold text-slate-600">गन्तव्य:</span> {trackedApp.destination}</div>
-                      <div className="col-span-2"><span className="font-semibold text-slate-600">रुट:</span> {trackedApp.proposed_route}</div>
-                    </div>
-
-                    {(trackedApp.status === 'issued' || trackedApp.status === 'active') && (
-                      <button
-                        type="button"
-                        onClick={() => navigate({ to: `/pass/${trackedApp.id}` })}
-                        className="w-full inline-flex items-center justify-center space-x-2 py-2 bg-[#0447AF] text-white font-bold rounded-lg text-xs"
-                      >
-                        <QrCode className="w-3.5 h-3.5" />
-                        <span>ई-पास कार्ड हेर्नुहोस् (Open Issued E-Pass)</span>
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* VIEW 5: ROAD CONDITIONS & HAZARDS */}
           {activeTab === 'road_conditions' && (
@@ -2168,116 +1965,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* VIEW 8: SECURITY & ACTIVITY AUDIT LOGS */}
-          {activeTab === 'audit_logs' && (
-            <div className="space-y-5">
-              {/* Header & Filter Toolbar */}
-              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-2xs">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                      <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                      <span>{t('admin.auditLogs')}</span>
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      Immutable administrative audit trail and security activity logs
-                    </p>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={fetchAuditLogsData}
-                    disabled={auditLoading}
-                    className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 transition-colors shadow-2xs"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${auditLoading ? 'animate-spin text-[#0447AF]' : ''}`} />
-                    <span>Refresh Logs</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-100">
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Search Audit Trail</label>
-                    <input
-                      type="text"
-                      value={auditSearchQuery}
-                      onChange={(e) => setAuditSearchQuery(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && fetchAuditLogsData()}
-                      placeholder="Action, Entity ID, Actor..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-900 text-xs focus:border-[#0447AF] focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filter by Entity</label>
-                    <select
-                      value={auditEntityFilter}
-                      onChange={(e) => {
-                        setAuditEntityFilter(e.target.value);
-                      }}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-900 text-xs focus:border-[#0447AF] focus:bg-white outline-none"
-                    >
-                      <option value="">All Entity Types</option>
-                      <option value="application">Applications</option>
-                      <option value="pass">Passes</option>
-                      <option value="checkpoint">Checkpoint Scans</option>
-                      <option value="road">Road Conditions</option>
-                      <option value="auth">Authentication</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Audit Table */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
-                      <tr>
-                        <th className="py-3 px-4">मिति तथा समय (Timestamp)</th>
-                        <th className="py-3 px-4">कार्य (Action)</th>
-                        <th className="py-3 px-4">Entity ID</th>
-                        <th className="py-3 px-4">जिम्मेवार अधिकारी (Actor)</th>
-                        <th className="py-3 px-4">IP ठेगाना</th>
-                        <th className="py-3 px-4">विवरण (Details)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {auditLogs.map((log) => (
-                        <tr key={log.id} className="hover:bg-slate-50 font-mono text-[11px]">
-                          <td className="py-3 px-4 whitespace-nowrap text-slate-500 font-sans">
-                            {new Date(log.created_at || (log as any).timestamp || Date.now()).toLocaleString()}
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap font-bold text-[#0447AF]">
-                            {log.action}
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap font-bold text-slate-800">
-                            {log.entity_id}
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap text-slate-700 font-sans">
-                            {log.actor_name || log.actor_id || 'System'} {log.actor_role ? `(${log.actor_role})` : ''}
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap text-slate-500">
-                            {log.ip_address || '127.0.0.1'}
-                          </td>
-                          <td className="py-3 px-4 text-slate-600 font-sans max-w-xs truncate">
-                            {log.details || '—'}
-                          </td>
-                        </tr>
-                      ))}
-                      {auditLogs.length === 0 && (
-                        <tr>
-                          <td colSpan={6} className="py-12 text-center text-slate-400 font-sans">
-                            कुनै अडिट लग भेटिएन।
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </main>
 

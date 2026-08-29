@@ -4,6 +4,7 @@ import { useI18n } from '../lib/i18n';
 import { adminLogin } from '../lib/api';
 import { prefetchAdminData } from '../lib/queryClient';
 import { Lock, User, AlertCircle, Loader2, Shield } from 'lucide-react';
+import { VehicleLogo } from '../components/common/VehicleLogo';
 
 export const AdminLogin = () => {
   const { t } = useI18n();
@@ -47,12 +48,8 @@ export const AdminLogin = () => {
       <div className="w-full max-w-md">
         {/* Sovereignty Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-lg border border-slate-200 mb-4">
-            <img
-              src="https://giwmscdnone.gov.np/static/assets/image/Emblem_of_Nepal.png"
-              alt="Government of Nepal Emblem"
-              className="h-14 w-auto object-contain"
-            />
+          <div className="inline-flex items-center justify-center mb-4">
+            <VehicleLogo size="xl" className="shadow-lg" />
           </div>
           <p className="text-[11px] font-bold text-[#CC1424] uppercase tracking-[0.18em] mb-1">
             {t('admin.dept')}
@@ -138,7 +135,7 @@ export const AdminLogin = () => {
 
         {/* Footer */}
         <p className="text-center text-[10px] text-slate-400 mt-5 font-medium">
-          Office of the Prime Minister and Council of Ministers · opmcm.gov.np
+          Nepal Disaster Relief Vehicle E-Pass System
         </p>
       </div>
     </div>

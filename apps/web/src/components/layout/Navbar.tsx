@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
-import { ShieldCheck, Lock, LogOut, Menu, X } from 'lucide-react';
+import { Lock, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { VehicleLogo } from '../common/VehicleLogo';
 
 export function Navbar() {
   const routerState = useRouterState();
@@ -29,16 +30,13 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center shadow-lg shadow-red-950/80 border border-red-500/50 group-hover:scale-105 transition-transform">
-              <ShieldCheck className="w-6 h-6 text-white" />
-            </div>
+            <VehicleLogo size="md" />
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs uppercase font-bold tracking-widest text-red-400">NEPAL DISASTER RESPONSE</span>
-                <span className="text-[10px] bg-red-900/60 border border-red-700/50 text-red-200 px-1 rounded">GOV OF NEPAL</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-red-400">DISASTER RELIEF</span>
               </div>
               <h1 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-1.5">
-                Vehicle E-Pass Portal
+                Nepal Disaster Relief Vehicle E-Pass
               </h1>
             </div>
           </Link>

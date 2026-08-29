@@ -70,7 +70,7 @@ export function PassCard({ pass, showPrintButton = true }: PassCardProps) {
               </div>
               <div>
                 <p className="text-[10px] sm:text-xs uppercase font-extrabold tracking-widest text-red-400 print:text-black">
-                  GOVERNMENT OF NEPAL &bull; RELIEF COORDINATION
+                  NEPAL DISASTER RELIEF VEHICLE E-PASS SYSTEM
                 </p>
                 <h2 className="text-base sm:text-xl font-black text-white tracking-tight print:text-black">
                   EMERGENCY VEHICLE E-PASS
@@ -214,7 +214,7 @@ export function PassCard({ pass, showPrintButton = true }: PassCardProps) {
         {/* Footer / Authority signature */}
         <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400 print:border-black print:text-black">
           <div>
-            <span className="font-bold block text-slate-300 print:text-black">{pass.issuing_authority || 'Government of Nepal Relief Coordination Center'}</span>
+            <span className="font-bold block text-slate-300 print:text-black">{pass.issuing_authority || 'Nepal Disaster Relief Vehicle E-Pass Coordination'}</span>
             <span>Issued by authorized officer: {pass.issued_by}</span>
           </div>
           <div className="text-right font-mono text-[10px]">

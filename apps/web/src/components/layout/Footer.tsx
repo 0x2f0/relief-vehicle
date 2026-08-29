@@ -2,6 +2,7 @@
 import { useI18n } from '../../lib/i18n';
 import { PhoneCall, MapPin, Mail, ShieldAlert } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { VehicleLogo } from '../common/VehicleLogo';
 
 export const Footer = () => {
   const { t } = useI18n();
@@ -11,17 +12,13 @@ export const Footer = () => {
     <footer className="bg-[#0447AF] text-white pt-10 pb-6 mt-auto border-t border-blue-900" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Government Entity Column */}
+          {/* Identity Column */}
           <div className="md:col-span-2 flex flex-col items-start">
             <div className="flex items-center space-x-3 mb-3">
-              <img 
-                src="https://giwmscdnone.gov.np/static/assets/image/Emblem_of_Nepal.png" 
-                alt="Government of Nepal Emblem" 
-                className="h-14 w-auto object-contain bg-white rounded-full p-1"
-              />
+              <VehicleLogo size="md" variant="white" />
               <div>
                 <h3 className="text-sm font-semibold text-blue-200">{t('app.subtitle')}</h3>
-                <h4 className="text-base font-bold text-white leading-snug">{t('app.dept')}</h4>
+                <h4 className="text-base font-bold text-white leading-snug">{t('app.title')}</h4>
               </div>
             </div>
             <p className="text-xs text-blue-100 max-w-md leading-relaxed mt-1">
