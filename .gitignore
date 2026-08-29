@@ -17,11 +17,12 @@ node_modules/
 local.db
 local.db*
 
-# Build Outputs
+# Build Outputs & Caches
 dist/
 build/
 .wrangler/
 .turbo/
+.vite/
 
 # Logs & System
 npm-debug.log*

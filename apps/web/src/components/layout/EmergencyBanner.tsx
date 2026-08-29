@@ -1,6 +1,6 @@
 
 import { PhoneCall } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 export function EmergencyBanner() {
   return (

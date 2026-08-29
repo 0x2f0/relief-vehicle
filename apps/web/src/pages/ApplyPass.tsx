@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useI18n } from '../lib/i18n';
 import { submitApplication } from '../lib/api';
 import { saveStoredPass } from '../lib/authTracker';
@@ -141,7 +141,7 @@ export const ApplyPass = () => {
           route: `${formData.departure_location} → ${formData.destination}`,
           timestamp: new Date().toISOString(),
         });
-        navigate(`/applied/${res.id}?token=${res.secret_token}`);
+        navigate({ to: '/applied/$id', params: { id: res.id } });
       } else {
         throw new Error('Invalid response from server');
       }

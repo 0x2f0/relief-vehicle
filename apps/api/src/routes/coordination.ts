@@ -4,7 +4,7 @@ import type { Bindings } from '../config';
 
 const coordination = new Hono<{ Bindings: Bindings }>();
 
-coordination.get('/', async (c) => {
+const handleStats = async (c: any) => {
   try {
     const db = getDbClient(c.env);
     const passesRes = await db.execute({
@@ -47,7 +47,10 @@ coordination.get('/', async (c) => {
       total_roads: 0,
     });
   }
-});
+};
+
+coordination.get('/', handleStats);
+coordination.get('/stats', handleStats);
 
 export default coordination;
 

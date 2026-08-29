@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ShieldCheck, Lock, LogOut, Menu, X,  } from 'lucide-react';
+import { Link, useRouterState } from '@tanstack/react-router';
+import { ShieldCheck, Lock, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export function Navbar() {
-  const location = useLocation();
+  const routerState = useRouterState();
+  const location = routerState.location;
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useI18n } from '../lib/i18n';
-import { getRoads, addRoadCondition, deleteRoadCondition } from '../lib/api';
+import { roadsQueryOptions, queryKeys } from '../lib/queryClient';
+import { addRoadCondition, deleteRoadCondition } from '../lib/api';
 import { RoadCondition } from '../lib/types';
+import { RoadListSkeleton } from '../components/common/Skeleton';
 import {
   MapPin,
   AlertTriangle,
@@ -18,13 +21,13 @@ import {
 
 export const RoadConditions = () => {
   const { t } = useI18n();
-  const [roads, setRoads] = useState<RoadCondition[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: roads = [], isLoading } = useQuery(roadsQueryOptions());
+
   const [filter, setFilter] = useState<'all' | 'open' | 'restricted' | 'emergency_only' | 'closed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [newRoad, setNewRoad] = useState({
     road_name: '',
     status: 'restricted',
@@ -36,48 +39,50 @@ export const RoadConditions = () => {
     setIsAuthorized(Boolean(token));
   };
 
-  const fetchRoads = async () => {
-    setLoading(true);
-    try {
-      const data = await getRoads();
-      setRoads(data || []);
-    } catch {
-      setRoads([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     checkAuth();
-    fetchRoads();
+    window.addEventListener('storage', checkAuth);
+    window.addEventListener('auth-change', checkAuth);
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('auth-change', checkAuth);
+    };
   }, []);
 
-  const handleAddSubmit = async (e: React.FormEvent) => {
+  // TanStack Query Mutations
+  const addMutation = useMutation({
+    mutationFn: addRoadCondition,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.roads });
+      queryClient.invalidateQueries({ queryKey: queryKeys.publicStats });
+      setShowAddModal(false);
+      setNewRoad({ road_name: '', status: 'restricted', description: '' });
+    },
+    onError: (err: any) => {
+      alert(err.message || 'Failed to publish road advisory');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteRoadCondition,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.roads });
+      queryClient.invalidateQueries({ queryKey: queryKeys.publicStats });
+    },
+    onError: (err: any) => {
+      alert(err.message || 'Failed to remove road advisory');
+    },
+  });
+
+  const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoad.road_name.trim()) return;
-
-    setSubmitting(true);
-    try {
-      await addRoadCondition(newRoad as any);
-      setNewRoad({ road_name: '', status: 'restricted', description: '' });
-      setShowAddModal(false);
-      await fetchRoads();
-    } catch (err: any) {
-      alert(err.message || 'Failed to publish road advisory');
-    } finally {
-      setSubmitting(false);
-    }
+    addMutation.mutate(newRoad);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this road advisory? / के यो सडक सूचना हटाउन चाहनुहुन्छ?')) return;
-    try {
-      await deleteRoadCondition(id);
-      await fetchRoads();
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete road advisory');
-    }
+  const handleDelete = (id: string) => {
+    if (!window.confirm('Delete this road advisory?')) return;
+    deleteMutation.mutate(id);
   };
 
   const filteredRoads = roads.filter((r) => {
@@ -89,34 +94,38 @@ export const RoadConditions = () => {
     return matchesFilter && matchesSearch;
   });
 
-  const getStatusBadge = (status: string) => {
+  const openCount = roads.filter((r) => r.status === 'open').length;
+  const restrictedCount = roads.filter((r) => r.status === 'restricted' || r.status === 'emergency_only').length;
+  const closedCount = roads.filter((r) => r.status === 'closed').length;
+
+  const getStatusBadge = (status: RoadCondition['status']) => {
     switch (status) {
       case 'open':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase">
-            <CheckCircle2 className="w-3 h-3 mr-1" />
-            <span>{t('roads.statusOpen')}</span>
+          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wide">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{t('roads.status.open')}</span>
           </span>
         );
       case 'restricted':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 uppercase">
-            <AlertTriangle className="w-3 h-3 mr-1" />
-            <span>{t('roads.statusRestricted')}</span>
+          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 uppercase tracking-wide">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+            <span>{t('roads.status.restricted')}</span>
           </span>
         );
       case 'emergency_only':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200 uppercase">
-            <Siren className="w-3 h-3 mr-1 text-[#0447AF]" />
-            <span>{t('roads.statusEmergency')}</span>
+          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200 uppercase tracking-wide">
+            <Siren className="w-3.5 h-3.5 text-blue-600" />
+            <span>{t('roads.status.emergency_only')}</span>
           </span>
         );
       case 'closed':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200 uppercase">
-            <XCircle className="w-3 h-3 mr-1 text-[#CC1424]" />
-            <span>{t('roads.statusClosed')}</span>
+          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200 uppercase tracking-wide">
+            <XCircle className="w-3.5 h-3.5 text-red-600" />
+            <span>{t('roads.status.closed')}</span>
           </span>
         );
       default:
@@ -125,162 +134,191 @@ export const RoadConditions = () => {
   };
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-xl shadow-xs border border-slate-200 space-y-6">
-      {/* Title, Actions & Refresh */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <div className="flex items-center space-x-2">
-            <MapPin className="w-6 h-6 text-[#CC1424]" />
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
-              {t('roads.title')}
-            </h1>
+    <div className="space-y-8 max-w-5xl mx-auto">
+      {/* 1. HEADER BANNER */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <MapPin className="w-6 h-6 text-[#CC1424]" />
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                {t('roads.title')}
+              </h1>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-600">
+              {t('roads.subtitle')}
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1">
-            {t('roads.subtitle')}
-          </p>
-        </div>
 
-        <div>
           {isAuthorized && (
             <button
               type="button"
               onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-[#CC1424] hover:bg-[#B00F1E] text-white text-xs font-bold transition-colors shadow-2xs"
+              className="inline-flex items-center space-x-1.5 px-4 py-2.5 bg-[#CC1424] hover:bg-[#B00F1E] text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-all active:scale-[0.98]"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-4 h-4" />
               <span>{t('roads.addBtn')}</span>
             </button>
           )}
         </div>
+
+        {/* 2. OVERVIEW METRICS */}
+        <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-100">
+          <div className="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200/60 flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-semibold text-emerald-800 block uppercase">
+                {t('roads.status.open')}
+              </span>
+              <span className="text-xl font-black text-emerald-900">{openCount}</span>
+            </div>
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+          </div>
+
+          <div className="bg-amber-50/60 p-3 rounded-xl border border-amber-200/60 flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-semibold text-amber-800 block uppercase">
+                {t('roads.status.restricted')}
+              </span>
+              <span className="text-xl font-black text-amber-900">{restrictedCount}</span>
+            </div>
+            <AlertTriangle className="w-5 h-5 text-amber-600" />
+          </div>
+
+          <div className="bg-red-50/60 p-3 rounded-xl border border-red-200/60 flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-semibold text-red-800 block uppercase">
+                {t('roads.status.closed')}
+              </span>
+              <span className="text-xl font-black text-red-900">{closedCount}</span>
+            </div>
+            <XCircle className="w-5 h-5 text-red-600" />
+          </div>
+        </div>
       </div>
 
-      {/* Filter Tabs & Search Bar */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4 items-stretch sm:items-center">
-        <div className="flex flex-wrap gap-1.5 bg-slate-100 p-1 rounded-lg">
-          {(['all', 'open', 'restricted', 'emergency_only', 'closed'] as const).map((f) => (
+      {/* 3. FILTERS & SEARCH */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row justify-between gap-3 items-stretch sm:items-center">
+        {/* Status Filter Tabs */}
+        <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-lg">
+          {[
+            { key: 'all', label: t('roads.filter.all') },
+            { key: 'open', label: t('roads.filter.open') },
+            { key: 'restricted', label: t('roads.filter.restricted') },
+            { key: 'closed', label: t('roads.filter.closed') },
+          ].map((f) => (
             <button
-              key={f}
+              key={f.key}
               type="button"
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                filter === f
+              onClick={() => setFilter(f.key as any)}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                filter === f.key
                   ? 'bg-white text-[#0447AF] shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              {f === 'all' && t('roads.filterAll')}
-              {f === 'open' && t('roads.filterOpen')}
-              {f === 'restricted' && t('roads.filterRestricted')}
-              {f === 'emergency_only' && t('roads.filterEmergency')}
-              {f === 'closed' && t('roads.filterClosed')}
+              {f.label}
             </button>
           ))}
         </div>
 
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+        {/* Search Input */}
+        <div className="relative flex-1 sm:w-64">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('roads.searchPlaceholder')}
-            className="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-xs w-full sm:w-64 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]"
+            className="w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:border-[#0447AF] bg-white"
           />
         </div>
       </div>
 
-      {/* Roads Table */}
-      <div className="overflow-x-auto border border-slate-200 rounded-xl">
-        <table className="w-full text-left border-collapse" aria-label="Highway Status Table">
-          <thead>
-            <tr className="bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
-              <th className="p-3.5">{t('roads.thHighway')}</th>
-              <th className="p-3.5">{t('roads.thStatus')}</th>
-              <th className="p-3.5">{t('roads.thDetails')}</th>
-              <th className="p-3.5">{t('roads.thUpdated')}</th>
-              {isAuthorized && <th className="p-3.5 text-right">Action</th>}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200 text-xs sm:text-sm">
-            {filteredRoads.map((road) => (
-              <tr key={road.id} className="hover:bg-slate-50/80 transition-colors">
-                <td className="p-3.5 font-semibold text-slate-900">
-                  {road.road_name}
-                </td>
-                <td className="p-3.5 whitespace-nowrap">
+      {/* 4. ROAD ADVISORIES LIST */}
+      {isLoading ? (
+        <RoadListSkeleton count={4} />
+      ) : (
+        <div className="space-y-3.5">
+          {filteredRoads.map((road) => (
+            <div
+              key={road.id}
+              className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs hover:shadow-xs transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 group"
+            >
+              <div className="space-y-2 flex-1">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h3 className="text-base font-bold text-slate-900 group-hover:text-[#0447AF] transition-colors">
+                    {road.road_name}
+                  </h3>
                   {getStatusBadge(road.status)}
-                </td>
-                <td className="p-3.5 text-slate-600 text-xs leading-relaxed max-w-sm">
-                  {road.description || road.reason || '-'}
-                </td>
-                <td className="p-3.5 text-xs text-slate-500 whitespace-nowrap font-mono">
-                  <span className="flex items-center space-x-1">
-                    <Clock className="w-3 h-3 text-slate-400" />
-                    <span>{new Date(road.updated_at || road.reported_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  </span>
-                </td>
-                {isAuthorized && (
-                  <td className="p-3.5 text-right whitespace-nowrap">
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(road.id)}
-                      className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors"
-                      title="Delete road advisory"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))}
-            {loading && (
-              <tr>
-                <td colSpan={isAuthorized ? 5 : 4} className="p-8 text-center text-slate-500">
-                  <div className="flex items-center justify-center space-x-2 text-xs font-semibold text-[#CC1424]">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>सडक विवरण लोड हुँदैछ...</span>
-                  </div>
-                </td>
-              </tr>
-            )}
-            {!loading && filteredRoads.length === 0 && (
-              <tr>
-                <td colSpan={isAuthorized ? 5 : 4} className="p-12 text-center text-slate-500">
-                  <div className="flex flex-col items-center justify-center space-y-2">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-1" />
-                    <p className="text-sm font-semibold text-slate-800">
-                      {t('roads.emptyTitle')}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {t('roads.emptyDesc')}
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                </div>
 
-      {/* Add Road Advisory Modal (For Authorized Personnel) */}
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  {road.description || 'No additional hazard details reported. Maintain caution.'}
+                </p>
+
+                <div className="flex items-center space-x-3 text-[11px] text-slate-400 pt-1">
+                  <span className="flex items-center space-x-1 font-mono">
+                    <Clock className="w-3 h-3 text-slate-400" />
+                    <span>
+                      {new Date(road.updated_at || road.reported_at || Date.now()).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </span>
+                  {road.reported_by && (
+                    <span>• Report Source: {road.reported_by}</span>
+                  )}
+                </div>
+              </div>
+
+              {isAuthorized && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(road.id)}
+                  disabled={deleteMutation.isPending}
+                  className="self-end sm:self-center p-2 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                  title="Remove advisory"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ))}
+
+          {filteredRoads.length === 0 && (
+            <div className="bg-white p-12 text-center rounded-2xl border border-slate-200 text-slate-500 text-xs sm:text-sm space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+              <p className="font-semibold text-slate-800">
+                {t('roads.noAlerts')}
+              </p>
+              <p className="text-slate-400 text-xs">
+                सबै प्रमुख राजमार्ग तथा राहत मार्गहरू सामान्य अवस्थामा छन्।
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 5. ADD ROAD ADVISORY MODAL */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-2xs">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-[#CC1424]" />
                 <span>{t('roads.addModalTitle')}</span>
-              </h2>
+              </h3>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                className="p-1 rounded text-slate-400 hover:text-slate-600"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleAddSubmit} className="space-y-4 text-xs sm:text-sm">
+            <form onSubmit={handleAddSubmit} className="space-y-3.5 text-xs sm:text-sm">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {t('roads.roadNameLabel')} <span className="text-[#CC1424]">*</span>
@@ -289,57 +327,56 @@ export const RoadConditions = () => {
                   required
                   type="text"
                   value={newRoad.road_name}
-                  onChange={(e) => setNewRoad((prev) => ({ ...prev, road_name: e.target.value }))}
-                  placeholder={t('roads.roadNamePlaceholder')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-xs sm:text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]"
+                  onChange={(e) => setNewRoad({ ...newRoad, road_name: e.target.value })}
+                  placeholder="उदा: Araniko Highway (Dolalghat - Melamchi Section)"
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-xs sm:text-sm focus:border-[#CC1424]"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  {t('roads.roadStatusLabel')} <span className="text-[#CC1424]">*</span>
+                  {t('roads.statusLabel')}
                 </label>
                 <select
                   value={newRoad.status}
-                  onChange={(e) => setNewRoad((prev) => ({ ...prev, status: e.target.value }))}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-xs sm:text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]"
+                  onChange={(e) => setNewRoad({ ...newRoad, status: e.target.value as any })}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-xs sm:text-sm bg-white font-medium focus:border-[#CC1424]"
                 >
-                  <option value="open">{t('roads.statusOpen')} (Open)</option>
-                  <option value="restricted">{t('roads.statusRestricted')} (Restricted / Single Lane)</option>
-                  <option value="emergency_only">{t('roads.statusEmergency')} (Emergency Convoy Only)</option>
-                  <option value="closed">{t('roads.statusClosed')} (Closed)</option>
+                  <option value="open">{t('roads.status.open')}</option>
+                  <option value="restricted">{t('roads.status.restricted')}</option>
+                  <option value="emergency_only">{t('roads.status.emergency_only')}</option>
+                  <option value="closed">{t('roads.status.closed')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  {t('roads.roadDescLabel')} <span className="text-[#CC1424]">*</span>
+                  {t('roads.descLabel')}
                 </label>
                 <textarea
-                  required
                   rows={3}
                   value={newRoad.description}
-                  onChange={(e) => setNewRoad((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder={t('roads.roadDescPlaceholder')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-xs sm:text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]"
+                  onChange={(e) => setNewRoad({ ...newRoad, description: e.target.value })}
+                  placeholder="पहिरो, बाढी वा सडक मर्मत सम्बन्धी थप विवरण..."
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-xs sm:text-sm focus:border-[#CC1424]"
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  className="px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700"
                 >
-                  {t('roads.cancelBtn')}
+                  Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="inline-flex items-center space-x-1.5 px-5 py-2 rounded-lg bg-[#CC1424] hover:bg-[#B00F1E] text-white text-xs font-bold transition-colors disabled:opacity-50 shadow-2xs"
+                  disabled={addMutation.isPending}
+                  className="px-4 py-2 rounded-lg bg-[#CC1424] hover:bg-[#B00F1E] text-white text-xs font-bold flex items-center space-x-1.5"
                 >
-                  {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{submitting ? t('roads.submitting') : t('roads.submitBtn')}</span>
+                  {addMutation.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{addMutation.isPending ? 'Publishing...' : t('roads.submitBtn')}</span>
                 </button>
               </div>
             </form>

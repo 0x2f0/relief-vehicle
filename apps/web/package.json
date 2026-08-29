@@ -8,6 +8,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/intent": "0.3.7",
+    "@tanstack/react-query": "5.102.8",
+    "@tanstack/react-router": "1.170.32",
+    "@tanstack/router-core": "1.171.27",
     "jsqr": "1.4.0",
     "lucide-react": "1.37.0",
     "qrcode.react": "^4.2.0",

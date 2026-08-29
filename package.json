@@ -20,6 +20,8 @@
   },
   "devDependencies": {
     "@libsql/client": "0.17.4",
+    "@tanstack/intent": "0.3.7",
+    "@tanstack/router-core": "1.171.27",
     "jose": "6.2.10",
     "typescript": "^5.8.2",
     "wrangler": "^4.104.0"

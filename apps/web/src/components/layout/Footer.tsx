@@ -1,7 +1,7 @@
 
 import { useI18n } from '../../lib/i18n';
 import { PhoneCall, MapPin, Mail, ShieldAlert } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 export const Footer = () => {
   const { t } = useI18n();

@@ -29,7 +29,10 @@ app.route('/api/verify', verify);
 app.route('/api/admin', admin);
 app.route('/api/roads', roads);
 app.route('/api/admin/roads', adminRoads);
-app.route('/api/public/stats', coordination); 
+app.route('/api/public/stats', coordination);
+app.route('/api/public', coordination);
+app.route('/public/stats', coordination);
+app.route('/api/stats', coordination); 
 
 app.get('/', (c) => {
   return c.json({ message: 'Relief Vehicle E-Pass API' });

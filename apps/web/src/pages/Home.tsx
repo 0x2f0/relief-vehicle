@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import { useI18n } from '../lib/i18n';
-import { getPublicStats } from '../lib/api';
-import { PublicStats } from '../lib/types';
+import { publicStatsQueryOptions } from '../lib/queryClient';
+import { HeroStatCardSkeleton } from '../components/common/Skeleton';
 import { isUserAuthorizedForTracking, getStoredPasses } from '../lib/authTracker';
 import {
   Search,
@@ -20,21 +21,16 @@ import {
 
 export const Home = () => {
   const { t } = useI18n();
-  const [stats, setStats] = useState<PublicStats>({
-    activePasses: 0,
-    approvedApplications: 0,
-    roadUpdates: 0,
-    checkpointScans: 0,
+  const { data: stats, isLoading: statsLoading } = useQuery(publicStatsQueryOptions());
+
+  const [hasTrackingAccess, setHasTrackingAccess] = useState(() => isUserAuthorizedForTracking());
+  const [isOfficer, setIsOfficer] = useState(() => {
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('relief_auth_token') || localStorage.getItem('token');
+    return Boolean(token);
   });
-  const [hasTrackingAccess, setHasTrackingAccess] = useState(false);
-  const [isOfficer, setIsOfficer] = useState(false);
-  const [storedCount, setStoredCount] = useState(0);
+  const [storedCount, setStoredCount] = useState(() => getStoredPasses().length);
 
   useEffect(() => {
-    getPublicStats()
-      .then((data) => setStats(data))
-      .catch(() => {});
-
     const check = () => {
       const token = localStorage.getItem('adminToken') || localStorage.getItem('relief_auth_token') || localStorage.getItem('token');
       setIsOfficer(Boolean(token));
@@ -56,134 +52,136 @@ export const Home = () => {
     <div className="space-y-10 sm:space-y-12 max-w-6xl mx-auto">
       {/* 1. PRIMARY HERO & COMMAND CENTER */}
       <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#052458] via-[#043B93] to-[#094EA7] text-white shadow-md border border-blue-900/40">
-        {/* Subtle Ambient Depth Glow and Emblem Watermark */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
-        <img
-          src="https://giwmscdnone.gov.np/static/assets/image/Emblem_of_Nepal.png"
-          alt=""
-          className="absolute -right-6 -bottom-6 w-60 h-60 object-contain opacity-5 pointer-events-none hidden md:block"
-        />
 
-        <div className="p-6 sm:p-9 md:p-10 relative z-10 space-y-6">
-          {/* Live Status Pill */}
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-semibold text-blue-100 backdrop-blur-xs">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-            </span>
-            <span>{t('home.hero.badge')}</span>
-          </div>
+        <div className="relative p-6 sm:p-10 z-10 space-y-8">
+          <div className="space-y-4 max-w-3xl">
+            <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold tracking-wide border border-white/15">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="uppercase text-[11px] text-blue-100">{t('app.dept')}</span>
+            </div>
 
-          {/* Heading & Value Proposition */}
-          <div className="max-w-2xl space-y-3">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight sm:leading-snug text-white">
               {t('home.hero.title')}
             </h1>
-            <p className="text-xs sm:text-sm md:text-base text-blue-100/90 leading-relaxed">
-              {t('home.hero.desc')}
+
+            <p className="text-sm sm:text-base text-blue-100/90 leading-relaxed font-normal">
+              {t('home.hero.subtitle')}
             </p>
           </div>
 
-          {/* Primary Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3.5 pt-2">
-            <Link
-              to="/apply"
-              className="inline-flex items-center space-x-2 bg-[#CC1424] hover:bg-[#B00F1E] text-white px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0"
-            >
-              <span>{t('home.hero.cta_apply')}</span>
-              <ArrowRight className="w-4 h-4 ml-0.5" />
-            </Link>
+          {/* Primary Quick-Action Buttons */}
+          <div className="flex flex-wrap gap-3.5 pt-2">
+            {!isOfficer && (
+              <Link
+                to="/apply"
+                preload="intent"
+                className="inline-flex items-center justify-center space-x-2 bg-[#CC1424] hover:bg-[#B00F1E] text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] border border-red-500/30 group"
+              >
+                <FilePlus className="w-4 h-4 text-white group-hover:rotate-6 transition-transform" />
+                <span>{t('home.hero.applyBtn')}</span>
+                <ArrowRight className="w-4 h-4 text-white/80 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            )}
 
             {hasTrackingAccess && (
               <Link
                 to="/track"
-                className="inline-flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white border border-white/25 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all backdrop-blur-xs hover:border-white/40"
+                preload="intent"
+                className="inline-flex items-center justify-center space-x-2 bg-white text-[#0447AF] hover:bg-blue-50 font-bold px-6 py-3.5 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] group"
               >
-                <Search className="w-4 h-4 text-blue-200" />
-                <span>
-                  {t('home.hero.cta_track')} {storedCount > 1 ? `(${storedCount})` : ''}
-                </span>
+                <Search className="w-4 h-4 text-[#0447AF]" />
+                <span>{t('home.hero.trackBtn')}</span>
               </Link>
             )}
 
             <Link
               to="/roads"
-              className="inline-flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white border border-white/25 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all backdrop-blur-xs hover:border-white/40"
+              preload="intent"
+              className="inline-flex items-center justify-center space-x-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-3.5 rounded-xl text-sm backdrop-blur-md transition-all border border-white/20"
             >
               <MapPin className="w-4 h-4 text-amber-300" />
-              <span>{t('roads.title')}</span>
+              <span>{t('home.hero.roadsBtn')}</span>
             </Link>
+
+            {isOfficer && (
+              <Link
+                to="/admin"
+                preload="intent"
+                className="inline-flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-md transition-all active:scale-[0.98]"
+              >
+                <QrCode className="w-4 h-4" />
+                <span>{t('admin.dashboard')}</span>
+              </Link>
+            )}
           </div>
-        </div>
 
-        {/* Live Operational Metrics Counter Strip */}
-        <div className="border-t border-white/15 bg-black/20 backdrop-blur-xs px-6 py-4 relative z-10">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-white/10 text-center">
-            <div className="pt-2 sm:pt-0">
-              <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
-                {stats.activePasses}
+          {/* Live Operational Metrics Ribbon with Skeletons */}
+          {statsLoading ? (
+            <HeroStatCardSkeleton />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-white/15">
+              <div className="bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/10 space-y-1">
+                <span className="text-blue-200 text-xs font-medium uppercase tracking-wider block">
+                  {t('home.stats.activePasses')}
+                </span>
+                <span className="text-2xl sm:text-3xl font-black text-white block">
+                  {stats?.activePasses ?? 0}
+                </span>
+                <span className="text-[11px] text-blue-200/70 font-medium">सक्रिय ई-पासहरू</span>
               </div>
-              <div className="text-[10px] sm:text-[11px] font-bold text-blue-200 uppercase tracking-wider mt-0.5">
-                {t('home.stats.active')}
+
+              <div className="bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/10 space-y-1">
+                <span className="text-blue-200 text-xs font-medium uppercase tracking-wider block">
+                  {t('home.stats.approved')}
+                </span>
+                <span className="text-2xl sm:text-3xl font-black text-white block">
+                  {stats?.approvedApplications ?? 0}
+                </span>
+                <span className="text-[11px] text-blue-200/70 font-medium">स्वीकृत राहत सवारी</span>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/10 space-y-1">
+                <span className="text-blue-200 text-xs font-medium uppercase tracking-wider block">
+                  {t('home.stats.scans')}
+                </span>
+                <span className="text-2xl sm:text-3xl font-black text-white block">
+                  {stats?.checkpointScans ?? 0}
+                </span>
+                <span className="text-[11px] text-blue-200/70 font-medium">चेकपोइन्ट स्क्यान</span>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/10 space-y-1">
+                <span className="text-blue-200 text-xs font-medium uppercase tracking-wider block">
+                  {t('home.stats.roads')}
+                </span>
+                <span className="text-2xl sm:text-3xl font-black text-amber-300 block">
+                  {stats?.roadUpdates ?? 0}
+                </span>
+                <span className="text-[11px] text-blue-200/70 font-medium">राजमार्ग स्थिति सूचना</span>
               </div>
             </div>
-
-            <div className="pt-2 sm:pt-0 sm:pl-4">
-              <div className="text-2xl sm:text-3xl font-black text-emerald-300 font-mono tracking-tight">
-                {stats.approvedApplications}
-              </div>
-              <div className="text-[10px] sm:text-[11px] font-bold text-blue-200 uppercase tracking-wider mt-0.5">
-                {t('home.stats.approved')}
-              </div>
-            </div>
-
-            <div className="pt-2 sm:pt-0 sm:pl-4">
-              <div className="text-2xl sm:text-3xl font-black text-amber-300 font-mono tracking-tight">
-                {stats.roadUpdates}
-              </div>
-              <div className="text-[10px] sm:text-[11px] font-bold text-blue-200 uppercase tracking-wider mt-0.5">
-                {t('home.stats.roads')}
-              </div>
-            </div>
-
-            <div className="pt-2 sm:pt-0 sm:pl-4">
-              <div className="text-2xl sm:text-3xl font-black text-sky-200 font-mono tracking-tight">
-                {stats.checkpointScans}
-              </div>
-              <div className="text-[10px] sm:text-[11px] font-bold text-blue-200 uppercase tracking-wider mt-0.5">
-                {t('home.stats.checkpoints')}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* 2. FIELD OPERATIONS & SERVICES */}
-      <section className="space-y-4" aria-label="Field Operations">
-        <div className="px-1">
-          <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-[#0447AF]"></span>
-            <span>{t('home.roads.title')} & {hasTrackingAccess ? t('track.title') : t('nav.apply')}</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Real-time highway transit advisories and emergency fleet coordination services
-          </p>
-        </div>
-
+      {/* 2. DYNAMIC WORKFLOW & ACCESS HUB */}
+      <section className="space-y-4" aria-label="Quick Access Portals">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Card 1: Highway & Road Conditions */}
+          {/* Card 1: Highway Conditions */}
           <Link
             to="/roads"
+            preload="intent"
             className="group bg-white rounded-xl border border-slate-200 p-6 shadow-2xs hover:shadow-sm hover:border-red-300 transition-all flex flex-col justify-between"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="p-3 rounded-lg bg-red-50 text-[#CC1424] group-hover:bg-[#CC1424] group-hover:text-white transition-all shadow-2xs">
-                  <MapPin className="w-5 h-5" />
+                  <AlertTriangle className="w-5 h-5" />
                 </div>
-                <span className="inline-flex items-center space-x-1 text-[11px] font-bold text-red-700 bg-red-50 border border-red-200/80 px-2.5 py-0.5 rounded-full uppercase tracking-wide">
-                  <AlertTriangle className="w-3 h-3" />
-                  <span>Live Updates</span>
+                <span className="inline-flex items-center space-x-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 rounded-full uppercase tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span>{t('home.roads.liveUpdates')}</span>
                 </span>
               </div>
 
@@ -206,7 +204,8 @@ export const Home = () => {
           {/* Card 2: Dynamic Role/Storage Card */}
           {isOfficer ? (
             <Link
-              to="/verify"
+              to="/admin"
+              preload="intent"
               className="group bg-white rounded-xl border border-slate-200 p-6 shadow-2xs hover:shadow-sm hover:border-blue-300 transition-all flex flex-col justify-between"
             >
               <div className="space-y-3">
@@ -215,28 +214,29 @@ export const Home = () => {
                     <QrCode className="w-5 h-5" />
                   </div>
                   <span className="inline-flex items-center space-x-1 text-[11px] font-bold text-[#0447AF] bg-blue-50 border border-blue-200/80 px-2.5 py-0.5 rounded-full uppercase tracking-wide">
-                    <span>Officer Portal</span>
+                    <span>Command Center</span>
                   </span>
                 </div>
 
                 <div>
                   <h3 className="text-base font-bold text-slate-900 group-hover:text-[#0447AF] transition-colors">
-                    {t('home.verify.title')}
+                    {t('admin.dashboard')}
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-1.5">
-                    {t('home.verify.desc')}
+                    Manage all applied passes, inspect cargo manifests, verify QR passes at checkpoints, and monitor routes.
                   </p>
                 </div>
               </div>
 
               <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#0447AF]">
-                <span>Open Checkpoint Scanner</span>
+                <span>Open Command Center</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           ) : hasTrackingAccess ? (
             <Link
               to="/track"
+              preload="intent"
               className="group bg-white rounded-xl border border-slate-200 p-6 shadow-2xs hover:shadow-sm hover:border-blue-300 transition-all flex flex-col justify-between"
             >
               <div className="space-y-3">
@@ -267,6 +267,7 @@ export const Home = () => {
           ) : (
             <Link
               to="/apply"
+              preload="intent"
               className="group bg-white rounded-xl border border-slate-200 p-6 shadow-2xs hover:shadow-sm hover:border-blue-300 transition-all flex flex-col justify-between"
             >
               <div className="space-y-3">
@@ -374,4 +375,3 @@ export const Home = () => {
     </div>
   );
 };
-

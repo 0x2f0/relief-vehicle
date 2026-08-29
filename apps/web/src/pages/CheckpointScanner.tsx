@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import jsQR from 'jsqr';
 import { useI18n } from '../lib/i18n';
 import { verifyScan, recordCheckpointScan, getCheckpoints } from '../lib/api';

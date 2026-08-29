@@ -8,7 +8,8 @@ import {
 	CoordinationDashboardData,
 } from "./types";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+const RAW_API_URL = (import.meta.env.VITE_API_URL as string | undefined) || "";
+const BASE_URL = RAW_API_URL ? RAW_API_URL.replace(/\/$/, "") : "/api";
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
@@ -21,7 +22,10 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 		headers["Authorization"] = `Bearer ${token}`;
 	}
 
-	const response = await fetch(`${BASE_URL}${endpoint}`, {
+	const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+	const url = cleanEndpoint.startsWith("http") ? cleanEndpoint : `${BASE_URL}${cleanEndpoint}`;
+
+	const response = await fetch(url, {
 		...options,
 		headers,
 	});
@@ -164,6 +168,20 @@ export async function revokePass(passId: string, revocation_reason: string) {
 	return fetchApi<{ message: string }>(`/admin/passes/${passId}/revoke`, {
 		method: "POST",
 		body: JSON.stringify({ revocation_reason }),
+	});
+}
+
+export async function holdApplication(id: string, admin_notes?: string) {
+	return fetchApi<{ message: string }>(`/admin/applications/${id}/hold`, {
+		method: "PATCH",
+		body: JSON.stringify({ admin_notes }),
+	});
+}
+
+export async function requestApplicationInfo(id: string, info_request_reason: string) {
+	return fetchApi<{ message: string }>(`/admin/applications/${id}/request-info`, {
+		method: "PATCH",
+		body: JSON.stringify({ info_request_reason }),
 	});
 }
 

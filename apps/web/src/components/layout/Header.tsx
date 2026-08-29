@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { useI18n } from '../../lib/i18n';
 import { isUserAuthorizedForTracking } from '../../lib/authTracker';
 import { Menu, X, ShieldCheck, AlertCircle } from 'lucide-react';
@@ -7,9 +7,26 @@ import { Menu, X, ShieldCheck, AlertCircle } from 'lucide-react';
 export const Header = () => {
   const { t, locale, setLocale } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [adminUser, setAdminUser] = useState<{ username: string; role?: string } | null>(null);
-  const [hasTrackingAccess, setHasTrackingAccess] = useState(false);
-  const location = useLocation();
+  const [adminUser, setAdminUser] = useState<{ username: string; role?: string } | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('relief_auth_token') || localStorage.getItem('token');
+    const username = localStorage.getItem('adminUsername');
+    const storedUser = localStorage.getItem('adminUser') || localStorage.getItem('relief_user');
+    if (token) {
+      if (storedUser) {
+        try {
+          return JSON.parse(storedUser);
+        } catch {
+          return { username: username || 'admin' };
+        }
+      }
+      return { username: username || 'admin' };
+    }
+    return null;
+  });
+  const [hasTrackingAccess, setHasTrackingAccess] = useState(() => isUserAuthorizedForTracking());
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
 
   useEffect(() => {
     const checkAuth = () => {
@@ -39,7 +56,7 @@ export const Header = () => {
       window.removeEventListener('storage', checkAuth);
       window.removeEventListener('auth-change', checkAuth);
     };
-  }, [location.pathname]);
+  }, [currentPath]);
 
   const navLinks = adminUser
     ? [
@@ -55,8 +72,8 @@ export const Header = () => {
       ];
 
   const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
+    if (path === '/') return currentPath === '/';
+    return currentPath.startsWith(path);
   };
 
   return (
@@ -65,7 +82,7 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Brand & Emblem */}
-          <Link to="/" className="flex items-center space-x-3 text-left focus:outline-none flex-shrink-0">
+          <Link to="/" preload="intent" className="flex items-center space-x-3 text-left focus:outline-none flex-shrink-0">
             <img
               src="https://giwmscdnone.gov.np/static/assets/image/Emblem_of_Nepal.png"
               alt="Government of Nepal Emblem"
@@ -87,6 +104,7 @@ export const Header = () => {
               <Link
                 key={link.to}
                 to={link.to}
+                preload="intent"
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                   isActive(link.to)
                     ? 'bg-blue-50 text-[#0447AF] font-bold'
@@ -132,6 +150,7 @@ export const Header = () => {
             {adminUser ? (
               <Link
                 to="/admin/dashboard"
+                preload="intent"
                 className="inline-flex items-center space-x-2 px-2.5 py-1 text-xs font-semibold text-slate-800 bg-white border border-blue-200 rounded-full hover:border-[#0447AF] hover:bg-blue-50/60 transition-all shadow-2xs group"
                 title="Admin Dashboard"
               >
@@ -146,6 +165,7 @@ export const Header = () => {
             ) : (
               <Link
                 to="/admin/login"
+                preload="intent"
                 className="hidden sm:inline-flex items-center space-x-1 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-[#0447AF] transition-colors"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-[#0447AF]" />
@@ -173,6 +193,7 @@ export const Header = () => {
             <Link
               key={link.to}
               to={link.to}
+              preload="intent"
               onClick={() => setMenuOpen(false)}
               className={`block px-3 py-2 rounded-lg text-sm font-semibold ${
                 isActive(link.to)
@@ -187,6 +208,7 @@ export const Header = () => {
             <div className="pt-2 border-t border-slate-100 mt-2">
               <Link
                 to="/admin/dashboard"
+                preload="intent"
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-slate-900 bg-blue-50/70"
               >
@@ -199,6 +221,7 @@ export const Header = () => {
           ) : (
             <Link
               to="/admin/login"
+              preload="intent"
               onClick={() => setMenuOpen(false)}
               className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
@@ -225,4 +248,3 @@ export const Header = () => {
     </header>
   );
 };
-

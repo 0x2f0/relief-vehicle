@@ -208,16 +208,139 @@ admin.delete('/users/:id', async (c) => {
   return c.json({ message: 'User account removed' });
 });
 
-admin.get('/coordination', async (c) => {
+admin.patch('/applications/:id/hold', async (c) => {
+  const id = c.req.param('id');
+  const { admin_notes } = await c.req.json().catch(() => ({}));
   const db = getDbClient(c.env);
-  const res = await db.execute('SELECT COUNT(*) as count, status FROM applications GROUP BY status');
-  return c.json({ stats: res.rows });
+  
+  await db.execute({
+    sql: 'UPDATE applications SET status = ?, admin_notes = ?, updated_at = ? WHERE id = ?',
+    args: ['held', admin_notes || 'Application held for route clearance verification', new Date().toISOString(), id]
+  });
+  
+  const user = c.get('user') as any;
+  await logAudit(c.env, 'HOLD_APPLICATION', 'application', id, user.id, user.role, `Application put on hold: ${admin_notes || 'Pending check'}`);
+  
+  return c.json({ message: 'Application held' });
+});
+
+admin.patch('/applications/:id/request-info', async (c) => {
+  const id = c.req.param('id');
+  const { info_request_reason } = await c.req.json();
+  const db = getDbClient(c.env);
+  
+  await db.execute({
+    sql: 'UPDATE applications SET status = ?, info_request_reason = ?, updated_at = ? WHERE id = ?',
+    args: ['info_requested', info_request_reason || 'Additional identity or cargo documentation required', new Date().toISOString(), id]
+  });
+  
+  const user = c.get('user') as any;
+  await logAudit(c.env, 'REQUEST_INFO', 'application', id, user.id, user.role, `Requested info: ${info_request_reason}`);
+  
+  return c.json({ message: 'Information requested from applicant' });
+});
+
+admin.get('/coordination', async (c) => {
+  try {
+    const db = getDbClient(c.env);
+
+    // 1. Status summary
+    const statusRes = await db.execute('SELECT status, COUNT(*) as count FROM applications GROUP BY status');
+    const statusSummary: Record<string, number> = {};
+    for (const r of statusRes.rows) {
+      statusSummary[r.status as string] = Number(r.count);
+    }
+
+    // 2. Duplicate vehicle / overlapping request detection
+    const duplicatesRes = await db.execute(`
+      SELECT vehicle_number, org_name, COUNT(*) as request_count, 
+             GROUP_CONCAT(destination, ', ') as destinations
+      FROM applications
+      WHERE status NOT IN ('rejected', 'revoked')
+      GROUP BY vehicle_number
+      HAVING COUNT(*) > 1
+      ORDER BY request_count DESC
+      LIMIT 10
+    `);
+
+    // 3. Top destination hubs
+    const destRes = await db.execute(`
+      SELECT destination, COUNT(*) as count,
+             SUM(CASE WHEN priority = 'Critical' THEN 1 ELSE 0 END) as critical_count
+      FROM applications
+      WHERE status IN ('approved', 'issued', 'active', 'submitted')
+      GROUP BY destination
+      ORDER BY count DESC
+      LIMIT 8
+    `);
+
+    // 4. Highway corridor volumes
+    const routesRes = await db.execute(`
+      SELECT proposed_route as route, COUNT(*) as count
+      FROM applications
+      WHERE proposed_route IS NOT NULL AND proposed_route != ''
+      GROUP BY proposed_route
+      ORDER BY count DESC
+      LIMIT 8
+    `);
+
+    // 5. Active Road Hazards
+    const roadsRes = await db.execute(`
+      SELECT road_name as road, status, description as reason
+      FROM road_conditions
+      WHERE status != 'open'
+      ORDER BY updated_at DESC
+      LIMIT 10
+    `);
+
+    return c.json({
+      stats: statusRes.rows,
+      statusSummary,
+      duplicateAlerts: duplicatesRes.rows,
+      destinations: destRes.rows,
+      routes: routesRes.rows,
+      roadHazards: roadsRes.rows,
+    });
+  } catch (err: any) {
+    return c.json({
+      stats: [],
+      statusSummary: {},
+      duplicateAlerts: [],
+      destinations: [],
+      routes: [],
+      roadHazards: [],
+    });
+  }
 });
 
 admin.get('/audit-logs', async (c) => {
-  const db = getDbClient(c.env);
-  const res = await db.execute('SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 100');
-  return c.json({ logs: res.rows });
+  try {
+    const db = getDbClient(c.env);
+    const entityType = c.req.query('entity_type');
+    const search = c.req.query('search')?.trim().toLowerCase();
+    const limit = Math.min(parseInt(c.req.query('limit') || '100', 10), 500);
+
+    let sql = 'SELECT * FROM audit_logs WHERE 1=1';
+    const args: any[] = [];
+
+    if (entityType) {
+      sql += ' AND entity_type = ?';
+      args.push(entityType);
+    }
+
+    if (search) {
+      sql += ' AND (LOWER(entity_id) LIKE ? OR LOWER(action) LIKE ? OR LOWER(actor_id) LIKE ? OR LOWER(details) LIKE ?)';
+      args.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    sql += ' ORDER BY created_at DESC LIMIT ?';
+    args.push(limit);
+
+    const res = await db.execute({ sql, args });
+    return c.json({ logs: res.rows });
+  } catch (err: any) {
+    return c.json({ logs: [] });
+  }
 });
 
 export default admin;

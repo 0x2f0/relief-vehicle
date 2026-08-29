@@ -1,0 +1,193 @@
+import { useEffect } from 'react';
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  Outlet,
+  ScrollRestoration,
+} from '@tanstack/react-router';
+import { Layout } from './components/layout/Layout';
+import { Home } from './pages/Home';
+import { ApplyPass } from './pages/ApplyPass';
+import { ApplicationSuccess } from './pages/ApplicationSuccess';
+import { TrackStatus } from './pages/TrackStatus';
+import { ViewPass } from './pages/ViewPass';
+import { CheckpointScanner } from './pages/CheckpointScanner';
+import { RoadConditions } from './pages/RoadConditions';
+import { AdminLogin } from './pages/AdminLogin';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminAuditLogs } from './pages/AdminAuditLogs';
+import { CoordinationCenter } from './pages/CoordinationCenter';
+import {
+  queryClient,
+  publicStatsQueryOptions,
+  roadsQueryOptions,
+  checkpointsQueryOptions,
+  passQueryOptions,
+  prefetchPublicData,
+  prefetchAdminData,
+} from './lib/queryClient';
+
+// Root Route Container with Layout, Preload Hook & Scroll Restoration
+const RootComponent = () => {
+  useEffect(() => {
+    // Non-blocking background prefetch
+    prefetchPublicData();
+  }, []);
+
+  return (
+    <Layout>
+      <ScrollRestoration />
+      <Outlet />
+    </Layout>
+  );
+};
+
+export const rootRoute = createRootRoute({
+  component: RootComponent,
+});
+
+// Non-blocking progressive route loaders for instantaneous frame-0 rendering
+export const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: Home,
+  loader: () => {
+    queryClient.prefetchQuery(publicStatsQueryOptions());
+    queryClient.prefetchQuery(roadsQueryOptions());
+  },
+});
+
+export const applyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/apply',
+  component: ApplyPass,
+  loader: () => {
+    queryClient.prefetchQuery(roadsQueryOptions());
+    queryClient.prefetchQuery(checkpointsQueryOptions());
+  },
+});
+
+export const appliedRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/applied/$id',
+  component: ApplicationSuccess,
+});
+
+export const trackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/track',
+  component: TrackStatus,
+});
+
+export const passRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/pass/$id',
+  component: ViewPass,
+  loader: ({ params }) => {
+    if (params.id) {
+      queryClient.prefetchQuery(passQueryOptions(params.id));
+    }
+  },
+});
+
+export const scannerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/scanner',
+  component: CheckpointScanner,
+  loader: () => {
+    queryClient.prefetchQuery(checkpointsQueryOptions());
+  },
+});
+
+export const verifyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/verify',
+  component: CheckpointScanner,
+  loader: () => {
+    queryClient.prefetchQuery(checkpointsQueryOptions());
+  },
+});
+
+export const roadsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/roads',
+  component: RoadConditions,
+  loader: () => {
+    queryClient.prefetchQuery(roadsQueryOptions());
+  },
+});
+
+export const coordinationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/coordination',
+  component: CoordinationCenter,
+});
+
+export const adminCoordinationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/coordination',
+  component: CoordinationCenter,
+});
+
+export const adminAuditRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/audit',
+  component: AdminAuditLogs,
+});
+
+export const adminLoginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/login',
+  component: AdminLogin,
+});
+
+export const adminDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/dashboard',
+  component: AdminDashboard,
+  loader: () => {
+    prefetchAdminData();
+  },
+});
+
+export const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin',
+  component: AdminDashboard,
+  loader: () => {
+    prefetchAdminData();
+  },
+});
+
+// Route Tree
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  applyRoute,
+  appliedRoute,
+  trackRoute,
+  passRoute,
+  scannerRoute,
+  verifyRoute,
+  roadsRoute,
+  coordinationRoute,
+  adminCoordinationRoute,
+  adminAuditRoute,
+  adminLoginRoute,
+  adminDashboardRoute,
+  adminRoute,
+]);
+
+// Type-Safe TanStack Router Instance with Snappy Preloading
+export const router = createRouter({
+  routeTree,
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 30_000,
+  scrollRestoration: true,
+});
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { Activity, AlertOctagon, MapPin, Truck, AlertTriangle, RefreshCw, Layers } from 'lucide-react';
 import { api } from '../lib/api';
 import { CoordinationDashboardData } from '../lib/types';
