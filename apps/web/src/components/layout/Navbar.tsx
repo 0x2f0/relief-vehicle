@@ -16,7 +16,6 @@ export function Navbar() {
     { name: 'Track Status', path: '/track' },
     { name: 'Roads & Hazards', path: '/roads' },
     { name: 'Checkpoint Scanner', path: '/scanner' },
-    { name: 'Coordination Matrix', path: '/coordination' },
   ];
 
   const isActive = (path: string) => {

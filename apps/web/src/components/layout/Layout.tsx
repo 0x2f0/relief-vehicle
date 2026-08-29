@@ -26,10 +26,6 @@ export const Layout = ({ children }: { children?: ReactNode }) => {
       pageTitle = t('scanner.title');
     } else if (path === '/admin' || path.startsWith('/admin/dashboard')) {
       pageTitle = t('admin.dashboard');
-    } else if (path.startsWith('/admin/audit')) {
-      pageTitle = t('admin.auditLogs');
-    } else if (path.startsWith('/coordination') || path.startsWith('/admin/coordination')) {
-      pageTitle = t('admin.coordination');
     } else if (path.startsWith('/admin/login')) {
       pageTitle = t('admin.login');
     } else if (path.startsWith('/pass')) {
@@ -45,10 +41,7 @@ export const Layout = ({ children }: { children?: ReactNode }) => {
 
   const isAdminView =
     path === '/admin' ||
-    path.startsWith('/admin/dashboard') ||
-    path.startsWith('/admin/audit') ||
-    path.startsWith('/coordination') ||
-    path.startsWith('/admin/coordination');
+    path.startsWith('/admin/dashboard');
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F4F7FC]">

@@ -17,8 +17,6 @@ import { CheckpointScanner } from './pages/CheckpointScanner';
 import { RoadConditions } from './pages/RoadConditions';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
-import { AdminAuditLogs } from './pages/AdminAuditLogs';
-import { CoordinationCenter } from './pages/CoordinationCenter';
 import {
   queryClient,
   publicStatsQueryOptions,
@@ -129,33 +127,6 @@ export const roadsRoute = createRoute({
   },
 });
 
-export const coordinationRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/coordination',
-  beforeLoad: requireStaffSession,
-  staleTime: 0,
-  preloadStaleTime: 0,
-  component: CoordinationCenter,
-});
-
-export const adminCoordinationRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/admin/coordination',
-  beforeLoad: requireStaffSession,
-  staleTime: 0,
-  preloadStaleTime: 0,
-  component: CoordinationCenter,
-});
-
-export const adminAuditRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/admin/audit',
-  beforeLoad: requireStaffSession,
-  staleTime: 0,
-  preloadStaleTime: 0,
-  component: AdminAuditLogs,
-});
-
 export const adminLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/login',
@@ -196,9 +167,6 @@ const routeTree = rootRoute.addChildren([
   scannerRoute,
   verifyRoute,
   roadsRoute,
-  coordinationRoute,
-  adminCoordinationRoute,
-  adminAuditRoute,
   adminLoginRoute,
   adminDashboardRoute,
   adminRoute,

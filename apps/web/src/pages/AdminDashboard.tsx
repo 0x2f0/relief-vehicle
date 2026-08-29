@@ -19,14 +19,12 @@ import {
   deleteRoadCondition,
   verifyScan,
   recordCheckpointScan,
-  api,
 } from '../lib/api';
-import { Application, Pass, RoadCondition, Priority, CoordinationDashboardData } from '../lib/types';
+import { Application, Pass, RoadCondition, Priority } from '../lib/types';
 import { clearAuthSession, getAuthToken } from '../lib/authSession';
 import {
   LayoutDashboard,
   FileText,
-  Activity,
   QrCode,
   Search,
   Navigation,
@@ -44,8 +42,6 @@ import {
   X,
   Upload,
   MapPin,
-  Truck,
-  Layers,
   UserPlus,
   Download,
   AlertOctagon,
@@ -61,7 +57,7 @@ export const AdminDashboard: React.FC = () => {
 
   // Active Admin View Tab
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'all_passes' | 'coordination' | 'verify_pass' | 'track_status' | 'road_conditions' | 'checkpoints' | 'users' | 'audit_logs'
+    'overview' | 'all_passes' | 'verify_pass' | 'road_conditions' | 'checkpoints' | 'users'
   >('overview');
 
   // Mobile sidebar open state
@@ -124,10 +120,6 @@ export const AdminDashboard: React.FC = () => {
   const [issueValidUntilDays, setIssueValidUntilDays] = useState(3);
   const [issueApprovedRoute, setIssueApprovedRoute] = useState('');
 
-  // Coordination Matrix state
-  const [coordinationData, setCoordinationData] = useState<CoordinationDashboardData | null>(null);
-  const [coordLoading, setCoordLoading] = useState(false);
-
   // Checkpoints state
   const [checkpoints, setCheckpoints] = useState<any[]>([]);
   const [cpLoading, setCpLoading] = useState(false);
@@ -189,23 +181,6 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const fetchCoordinationData = async () => {
-    setCoordLoading(true);
-    try {
-      const data = await api.getCoordinationDashboard();
-      if (data) {
-        setCoordinationData(data);
-      }
-    } catch {
-      setCoordinationData(null);
-      if (!getAuthToken()) {
-        navigate({ to: '/admin/login', replace: true });
-      }
-    } finally {
-      setCoordLoading(false);
-    }
-  };
-
   const fetchCheckpointsData = async () => {
     setCpLoading(true);
     try {
@@ -262,7 +237,6 @@ export const AdminDashboard: React.FC = () => {
       } catch {}
     }
     fetchApplicationsData();
-    fetchCoordinationData();
     fetchCheckpointsData();
     fetchRoadsData();
 
@@ -775,7 +749,7 @@ export const AdminDashboard: React.FC = () => {
     <div className="flex-1 flex flex-col lg:flex-row w-full bg-[#F8FAFC]">
       {/* 1. VERTICAL SIDEBAR NAVIGATION */}
       <aside
-        className={`fixed inset-y-0 left-0 z-[60] w-64 bg-white border-r border-slate-200/80 text-slate-700 flex flex-col justify-between transform transition-transform duration-200 lg:static lg:translate-x-0 lg:sticky lg:top-0 lg:h-[calc(100vh-65px)] flex-shrink-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200/80 text-slate-700 flex flex-col justify-between transform transition-transform duration-200 lg:static lg:translate-x-0 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] flex-shrink-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -858,26 +832,6 @@ export const AdminDashboard: React.FC = () => {
                 <span className="text-[11px] text-slate-400 font-mono">
                   {applications.length}
                 </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  stopCamera();
-                  setActiveTab('coordination');
-                  setSidebarOpen(false);
-                }}
-                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
-                  activeTab === 'coordination'
-                    ? 'bg-blue-50 text-[#0447AF] font-bold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
-                }`}
-              >
-                <div className="flex items-center space-x-2.5">
-                  <Activity className={`w-4 h-4 ${activeTab === 'coordination' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
-                  <span>{t('admin.coordination')}</span>
-                </div>
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></span>
               </button>
 
               <button
@@ -981,13 +935,12 @@ export const AdminDashboard: React.FC = () => {
             type="button"
             onClick={() => {
               fetchApplicationsData();
-              fetchCoordinationData();
               fetchCheckpointsData();
               fetchRoadsData();
             }}
             className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 text-xs font-semibold transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading || cpLoading || usersLoading || roadsLoading || coordLoading ? 'animate-spin text-[#0447AF]' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading || cpLoading || usersLoading || roadsLoading ? 'animate-spin text-[#0447AF]' : ''}`} />
             <span>{t('admin.refresh')}</span>
           </button>
 
@@ -1011,9 +964,9 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* 2. MAIN ADMIN CONTENT WORKSPACE */}
-      <main className="flex-1 flex flex-col bg-[#F8FAFC] min-w-0 overflow-hidden">
+      <main className="flex-1 flex flex-col bg-[#F8FAFC] min-w-0">
         {/* Top Command Bar */}
-        <header className="bg-white border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between flex-shrink-0 sticky top-0 z-20">
+        <header className="bg-white border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between flex-shrink-0 sticky top-16 z-20">
           <div className="flex items-center space-x-3">
             <button
               type="button"
@@ -1030,8 +983,6 @@ export const AdminDashboard: React.FC = () => {
                   ? t('admin.overview')
                   : activeTab === 'all_passes'
                   ? t('admin.applications')
-                  : activeTab === 'coordination'
-                  ? t('admin.coordination')
                   : activeTab === 'verify_pass'
                   ? t('admin.scanner')
                   : activeTab === 'road_conditions'
@@ -1424,126 +1375,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* VIEW 2: LIVE FLEET COORDINATION MATRIX */}
-          {activeTab === 'coordination' && (
-            <div className="space-y-6">
-              {/* Header */}
-              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
-                <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-[11px] font-semibold">
-                    <Activity className="w-3.5 h-3.5 text-red-600" />
-                    <span>Real-Time Fleet Matrix</span>
-                  </div>
-                  <h2 className="text-lg sm:text-xl font-bold text-slate-900">Emergency Fleet Coordination</h2>
-                  <p className="text-xs text-slate-500">
-                    High-level operational visibility: relief trip bottlenecks, duplicate vehicle detection, and destination flows.
-                  </p>
-                </div>
 
-                <button
-                  type="button"
-                  onClick={fetchCoordinationData}
-                  disabled={coordLoading}
-                  className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 transition-colors shadow-2xs"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${coordLoading ? 'animate-spin text-[#0447AF]' : ''}`} />
-                  <span>Refresh Matrix</span>
-                </button>
-              </div>
-
-              {/* Duplicate Alerts */}
-              {coordinationData?.duplicateAlerts && coordinationData.duplicateAlerts.length > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3 shadow-2xs">
-                  <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
-                    <AlertTriangle className="w-5 h-5 text-amber-600" />
-                    <span>Duplicate Movement Alerts ({coordinationData.duplicateAlerts.length} Vehicles Flagged)</span>
-                  </div>
-                  <p className="text-xs text-amber-800">
-                    The following vehicles or organizations have multiple active movement requests:
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-                    {coordinationData.duplicateAlerts.map((item: any) => (
-                      <div key={item.vehicle_number} className="bg-white border border-amber-200 p-4 rounded-xl text-xs space-y-1 shadow-2xs">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-slate-900">{item.vehicle_number}</span>
-                          <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">
-                            {item.request_count} Requests
-                          </span>
-                        </div>
-                        <p className="text-slate-800 font-semibold">{item.org_name}</p>
-                        <p className="text-slate-500 text-[11px]">Destinations: {item.destinations}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Grid: Destinations & Highway Volumes */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Destinations */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-2xs">
-                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <MapPin className="w-4 h-4 text-red-500" /> Top Target Destination Hubs
-                  </h3>
-                  <div className="space-y-2.5">
-                    {coordinationData?.destinations?.map((dest: any) => (
-                      <div key={dest.destination} className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex items-center justify-between text-xs">
-                        <div>
-                          <p className="font-bold text-slate-900">{dest.destination}</p>
-                          <span className="text-[11px] text-red-600 font-semibold">
-                            {dest.critical_count ? `${dest.critical_count} Critical P1 Missions` : 'Standard Relief Route'}
-                          </span>
-                        </div>
-                        <div className="text-right font-mono">
-                          <span className="text-lg font-black text-[#0447AF]">{dest.count}</span>
-                          <span className="text-[10px] text-slate-400 block">Vehicles</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Highway Volumes */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-2xs">
-                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <Truck className="w-4 h-4 text-amber-500" /> Highway Corridor Movement Volumes
-                  </h3>
-                  <div className="space-y-2.5">
-                    {coordinationData?.routes?.map((rt: any) => (
-                      <div key={rt.route} className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex items-center justify-between text-xs">
-                        <p className="font-semibold text-slate-800 pr-3">{rt.route}</p>
-                        <div className="text-right font-mono shrink-0">
-                          <span className="text-base font-bold text-emerald-600">{rt.count}</span>
-                          <span className="text-[10px] text-slate-400 block">Convoys</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Road Hazards Overlay */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-2xs">
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-                  <Layers className="w-4 h-4 text-orange-500" /> Active Highway Hazard Advisories
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {coordinationData?.roadHazards?.map((rh: any, idx: number) => (
-                    <div key={idx} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900 truncate">{rh.road}</span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 uppercase">
-                          {rh.status}
-                        </span>
-                      </div>
-                      <p className="text-slate-600 text-[11px] leading-relaxed">{rh.reason}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* VIEW 3: EMBEDDED PASS VERIFIER & SCANNER */}
           {activeTab === 'verify_pass' && (
