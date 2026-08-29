@@ -1,11 +1,11 @@
 import { Hono } from 'hono';
-import { Env } from '../config';
+import type { Bindings, Variables } from '../config';
 import { getDbClient } from '../db/client';
-import { requireAuth } from '../middleware/auth';
+import { authMiddleware } from '../middleware/auth';
 
-export const auditRouter = new Hono<{ Bindings: Env }>();
+export const auditRouter = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
-auditRouter.get('/', requireAuth(['superadmin']), async (c) => {
+auditRouter.get('/', authMiddleware, async (c) => {
   const client = getDbClient(c.env);
   const entityType = c.req.query('entity_type');
   const search = c.req.query('search')?.trim().toLowerCase();

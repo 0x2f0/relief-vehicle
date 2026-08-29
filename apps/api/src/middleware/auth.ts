@@ -1,8 +1,8 @@
 import { Context, Next } from 'hono';
 import { jwtVerify } from 'jose';
-import type { Bindings } from '../config';
+import type { Bindings, Variables } from '../config';
 
-export async function authMiddleware(c: Context<{ Bindings: Bindings }>, next: Next) {
+export async function authMiddleware(c: Context<{ Bindings: Bindings; Variables: Variables }>, next: Next) {
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return c.json({ error: 'Unauthorized' }, 401);

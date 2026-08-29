@@ -69,4 +69,27 @@ html, body {
   }
 }
 
+/* Caret color */
+input, textarea {
+  caret-color: #0447AF;
+}
+
+/* Tabular numerals for data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Admin sidebar scrollbar */
+aside::-webkit-scrollbar {
+  width: 4px;
+}
+aside::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 2px;
+}
 

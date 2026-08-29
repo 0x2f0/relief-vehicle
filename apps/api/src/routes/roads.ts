@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { getDbClient } from '../db/client';
 import { authMiddleware } from '../middleware/auth';
-import type { Bindings } from '../config';
+import type { Bindings, Variables } from '../config';
 
-const roads = new Hono<{ Bindings: Bindings }>();
+const roads = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 roads.get('/', async (c) => {
   const db = getDbClient(c.env);
@@ -11,7 +11,7 @@ roads.get('/', async (c) => {
   return c.json({ roads: res.rows });
 });
 
-const adminRoads = new Hono<{ Bindings: Bindings }>();
+const adminRoads = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 adminRoads.use('*', authMiddleware);
 
 adminRoads.post('/', async (c) => {

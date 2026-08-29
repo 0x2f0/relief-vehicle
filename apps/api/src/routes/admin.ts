@@ -3,9 +3,9 @@ import { getDbClient } from '../db/client';
 import { authMiddleware } from '../middleware/auth';
 import { hashPassword } from './auth';
 import { logAudit } from '../services/audit';
-import type { Bindings } from '../config';
+import type { Bindings, Variables } from '../config';
 
-const admin = new Hono<{ Bindings: Bindings }>();
+const admin = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 admin.use('*', authMiddleware);
 

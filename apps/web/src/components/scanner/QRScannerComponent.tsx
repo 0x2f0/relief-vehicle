@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Html5Qrcode } from 'html5-qrcode';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import jsQR from 'jsqr';
 import { Camera, Upload, Type, AlertCircle } from 'lucide-react';
 
 interface QRScannerProps {
@@ -10,80 +10,125 @@ export function QRScannerComponent({ onScanSuccess }: QRScannerProps) {
   const [activeTab, setActiveTab] = useState<'camera' | 'upload' | 'manual'>('camera');
   const [manualInput, setManualInput] = useState('');
   const [cameraError, setCameraError] = useState<string | null>(null);
-  const [, setIsScanning] = useState(false);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const mountedRef = useRef(true);
+
+  const stopCamera = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
+    mountedRef.current = true;
+    if (activeTab !== 'camera') return;
 
-    if (activeTab === 'camera') {
-      const elementId = 'reader-container';
-      const html5QrCode = new Html5Qrcode(elementId);
-      scannerRef.current = html5QrCode;
+    let cancelled = false;
 
-      const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-      };
+    function scanFrame() {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (!video || !canvas || cancelled) return;
 
-      html5QrCode
-        .start(
-          { facingMode: 'environment' },
-          config,
-          (decodedText) => {
-            if (isMounted) {
-              onScanSuccess(decodedText);
-            }
-          },
-          () => {
-            // Frame error - ignore
-          }
-        )
-        .then(() => {
-          if (isMounted) {
-            setIsScanning(true);
-            setCameraError(null);
-          }
-        })
-        .catch((err) => {
-          if (isMounted) {
-            console.warn('Camera start error:', err);
-            setCameraError('Camera access unavailable or permission denied. Use Photo Upload or Manual ID below.');
-            setIsScanning(false);
-          }
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: 'dontInvert',
         });
-    }
-
-    return () => {
-      isMounted = false;
-      if (scannerRef.current) {
-        if (scannerRef.current.isScanning) {
-          scannerRef.current.stop().then(() => {
-            try {
-              scannerRef.current?.clear();
-            } catch {}
-          }).catch(() => {});
-        } else {
-          try {
-            scannerRef.current.clear();
-          } catch {}
+        if (code && mountedRef.current) {
+          onScanSuccess(code.data);
+          return;
         }
       }
+
+      rafRef.current = requestAnimationFrame(scanFrame);
+    }
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+        setCameraError(null);
+        scanFrame();
+      } catch {
+        if (!cancelled && mountedRef.current) {
+          setCameraError(
+            'Camera access unavailable or permission denied. Use Photo Upload or Manual ID below.'
+          );
+        }
+      }
+    }
+
+    startCamera();
+
+    return () => {
+      cancelled = true;
+      stopCamera();
     };
-  }, [activeTab, onScanSuccess]);
+  }, [activeTab, onScanSuccess, stopCamera]);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      stopCamera();
+    };
+  }, [stopCamera]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    try {
-      const html5QrCode = new Html5Qrcode('file-scanner-hidden');
-      const decodedText = await html5QrCode.scanFile(file, true);
-      onScanSuccess(decodedText);
-    } catch (err) {
-      alert('Could not detect a valid QR code in this image. Please try another photo or enter ID manually.');
-    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'dontInvert',
+      });
+      if (code) {
+        onScanSuccess(code.data);
+      } else {
+        alert(
+          'Could not detect a valid QR code in this image. Please try another photo or enter ID manually.'
+        );
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      alert('Failed to load image.');
+    };
+    img.src = url;
   };
 
   const handleManualSubmit = (e: React.FormEvent) => {
@@ -123,14 +168,12 @@ export function QRScannerComponent({ onScanSuccess }: QRScannerProps) {
         </button>
       </div>
 
-      {/* Hidden file scanner container */}
-      <div id="file-scanner-hidden" className="hidden"></div>
-
       {/* Tab 1: Live Camera Scanner */}
       {activeTab === 'camera' && (
         <div className="space-y-3">
           <div className="relative overflow-hidden rounded-xl bg-black aspect-square border border-slate-700 flex items-center justify-center">
-            <div id="reader-container" className="w-full h-full"></div>
+            <video ref={videoRef} className="w-full h-full object-cover" muted playsInline />
+            <canvas ref={canvasRef} className="hidden" />
             {cameraError && (
               <div className="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
                 <AlertCircle className="w-10 h-10 text-amber-400 mb-2" />

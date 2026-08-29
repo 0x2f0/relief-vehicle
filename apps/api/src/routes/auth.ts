@@ -2,9 +2,9 @@ import { Hono } from 'hono';
 import { SignJWT } from 'jose';
 import { getDbClient } from '../db/client';
 import { authMiddleware } from '../middleware/auth';
-import type { Bindings } from '../config';
+import type { Bindings, Variables } from '../config';
 
-const auth = new Hono<{ Bindings: Bindings }>();
+const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 function hexToBytes(hex: string): Uint8Array {
   const bytes = new Uint8Array(hex.length / 2);
