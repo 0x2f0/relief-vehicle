@@ -26,22 +26,30 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 	const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 	const url = cleanEndpoint.startsWith("http") ? cleanEndpoint : `${BASE_URL}${cleanEndpoint}`;
 
-	const response = await fetch(url, {
-		...options,
-		headers,
-	});
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), 7000);
 
-	if (response.status === 401 && !cleanEndpoint.includes("/auth/login")) {
-		clearAuthStorage();
+	try {
+		const response = await fetch(url, {
+			...options,
+			headers,
+			signal: options.signal || controller.signal,
+		});
+
+		if (response.status === 401 && !cleanEndpoint.includes("/auth/login")) {
+			clearAuthStorage();
+		}
+
+		if (!response.ok) {
+			const errorBody = await response.json().catch(() => ({}));
+			const message = (errorBody as any).error || (errorBody as any).message || response.statusText;
+			throw new Error(message || "Request failed");
+		}
+
+		return await response.json();
+	} finally {
+		clearTimeout(timeoutId);
 	}
-
-	if (!response.ok) {
-		const errorBody = await response.json().catch(() => ({}));
-		const message = (errorBody as any).error || (errorBody as any).message || response.statusText;
-		throw new Error(message || "Request failed");
-	}
-
-	return response.json();
 }
 
 export async function submitApplication(data: Record<string, any>) {
@@ -90,8 +98,12 @@ export async function getPublicStats(): Promise<PublicStats> {
 }
 
 export async function getRoads(): Promise<RoadCondition[]> {
-	const res = await fetchApi<{ roads: RoadCondition[] }>("/roads");
-	return res.roads || [];
+	try {
+		const res = await fetchApi<{ roads: RoadCondition[] }>("/roads");
+		return res.roads || [];
+	} catch {
+		return [];
+	}
 }
 
 export async function addRoadCondition(data: {

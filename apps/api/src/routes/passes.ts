@@ -18,10 +18,10 @@ passes.get('/:id/public', async (c) => {
             a.cargo_type, a.departure_location, a.destination, a.priority, a.proposed_route
           FROM passes p
           JOIN applications a ON a.id = p.application_id
-          WHERE p.id = ? OR p.application_id = ?
-          ORDER BY p.created_at DESC
+          WHERE p.id = ? OR p.application_id = ? OR UPPER(REPLACE(a.vehicle_number, ' ', '')) = UPPER(REPLACE(?, ' ', ''))
+          ORDER BY datetime(p.created_at) DESC
           LIMIT 1`,
-    args: [id, id],
+    args: [id, id, id],
   });
 
   if (res.rows.length === 0) {

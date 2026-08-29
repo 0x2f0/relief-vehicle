@@ -210,7 +210,7 @@ export const TrackStatus = () => {
         </form>
       </div>
 
-      {loading && <TimelineSkeleton />}
+      {loading && Boolean(queryCode) && !isError && <TimelineSkeleton />}
 
       {isError && queryCode && (
         <div className="bg-red-50 border border-red-200 p-6 rounded-2xl text-center space-y-2">

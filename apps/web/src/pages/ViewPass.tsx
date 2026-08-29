@@ -14,7 +14,7 @@ export const ViewPass = () => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
-  const { data: passRes, isLoading } = useQuery(passQueryOptions(id));
+  const { data: passRes, isLoading, isError } = useQuery(passQueryOptions(id));
   const passData = passRes?.pass;
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export const ViewPass = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !isError) {
     return (
       <div className="space-y-4 max-w-xl mx-auto">
         <PassSkeleton />

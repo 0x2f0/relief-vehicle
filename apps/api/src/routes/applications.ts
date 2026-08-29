@@ -73,8 +73,11 @@ applications.get('/:id/track', async (c) => {
           departure_location, destination, proposed_route, cargo_type,
           cargo_details, travel_purpose, priority, status, admin_notes,
           info_request_reason, secret_token, created_at, updated_at
-          FROM applications WHERE id = ?`,
-    args: [id],
+          FROM applications
+          WHERE id = ? OR UPPER(REPLACE(vehicle_number, ' ', '')) = UPPER(REPLACE(?, ' ', ''))
+          ORDER BY datetime(created_at) DESC
+          LIMIT 1`,
+    args: [id, id],
   });
 
   if (res.rows.length === 0) {
@@ -86,9 +89,10 @@ applications.get('/:id/track', async (c) => {
     return c.json({ error: 'Application not found or invalid token' }, 404);
   }
 
+  const appId = String(row.id);
   const passRes = await db.execute({
-    sql: `SELECT id, status FROM passes WHERE application_id = ? ORDER BY created_at DESC LIMIT 1`,
-    args: [id],
+    sql: `SELECT id, status FROM passes WHERE application_id = ? ORDER BY datetime(created_at) DESC LIMIT 1`,
+    args: [appId],
   });
   const pass = passRes.rows[0] as { id?: string; status?: string } | undefined;
 

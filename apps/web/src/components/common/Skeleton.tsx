@@ -23,7 +23,7 @@ export const GlobalLoadingBar: React.FC = () => {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-transparent overflow-hidden pointer-events-none">
-      <div className="h-full bg-gradient-to-r from-[#0447AF] via-[#CC1424] to-[#0447AF] animate-[indeterminate_1.2s_infinite_linear]" />
+      <div className="h-full w-full bg-gradient-to-r from-[#0447AF] via-[#CC1424] to-[#0447AF] animate-indeterminate" />
     </div>
   );
 };

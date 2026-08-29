@@ -12,10 +12,11 @@ import {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 2, // 2 minutes stale time for instant snappy navigation
-      gcTime: 1000 * 60 * 10, // 10 minutes cache retention
-      refetchOnWindowFocus: true,
+      staleTime: 1000 * 30, // 30 seconds
+      gcTime: 1000 * 60 * 5, // 5 minutes cache retention
+      refetchOnWindowFocus: false,
       retry: 1,
+      retryDelay: 800,
     },
   },
 });
@@ -35,12 +36,19 @@ export const publicStatsQueryOptions = () =>
   queryOptions({
     queryKey: queryKeys.publicStats,
     queryFn: () => getPublicStats(),
+    placeholderData: {
+      activePasses: 0,
+      approvedApplications: 0,
+      roadUpdates: 0,
+      checkpointScans: 0,
+    },
   });
 
 export const roadsQueryOptions = () =>
   queryOptions({
     queryKey: queryKeys.roads,
     queryFn: () => getRoads(),
+    placeholderData: [],
   });
 
 export const checkpointsQueryOptions = () =>

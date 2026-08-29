@@ -93,3 +93,19 @@ aside::-webkit-scrollbar-thumb {
   border-radius: 2px;
 }
 
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-indeterminate {
+  animation: indeterminate 1.2s infinite ease-in-out;
+}
+
