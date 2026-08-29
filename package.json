@@ -16,7 +16,9 @@
     "db:migrate": "bun run ./scripts/migrate.ts",
     "db:seed": "bun run ./scripts/seed.ts",
     "test": "bun run ./scripts/test-e2e.ts",
-    "deploy": "bash ./scripts/deploy.sh"
+    "deploy:web": "bash ./scripts/deploy.sh web",
+    "deploy:api": "bash ./scripts/deploy.sh api",
+    "deploy": "bun run deploy:api && bun run deply:web"
   },
   "devDependencies": {
     "@libsql/client": "0.17.4",

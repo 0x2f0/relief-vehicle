@@ -804,76 +804,48 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-[88vh] bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
+    <div className="flex flex-col lg:flex-row min-h-[85vh] bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
       {/* 1. VERTICAL SIDEBAR NAVIGATION */}
       <aside
-        className={`fixed inset-y-0 left-0 z-[60] w-72 bg-slate-900 text-white flex flex-col justify-between transform transition-transform duration-200 lg:static lg:translate-x-0 lg:max-h-[88vh] ${
+        className={`fixed inset-y-0 left-0 z-[60] w-64 bg-slate-50/80 border-r border-slate-200/80 text-slate-700 flex flex-col justify-between transform transition-transform duration-200 lg:static lg:translate-x-0 lg:max-h-[85vh] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-5 space-y-6 overflow-y-auto flex-1 min-h-0">
-          {/* Header Identity */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-700/60">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-white/10 ring-1 ring-white/10 flex items-center justify-center flex-shrink-0">
-                <img
-                  src="https://giwmscdnone.gov.np/static/assets/image/Emblem_of_Nepal.png"
-                  alt="Emblem of Nepal"
-                  className="h-7 w-auto object-contain"
-                />
-              </div>
-              <div>
-                <span className="text-[9px] uppercase font-bold tracking-[0.18em] text-[#CC1424] block">
-                  {t('admin.title')}
-                </span>
-                <h2 className="text-sm font-bold text-white leading-tight">
-                  {t('app.title')}
-                </h2>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-1 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Active User Identity Pill */}
-          <div className="bg-slate-800/60 p-3 rounded-xl border border-slate-700/40 space-y-2">
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Active User / Station Info */}
+          <div className="px-4 py-3.5 border-b border-slate-200/70 bg-white/60">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-200 flex items-center space-x-1.5 truncate">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/20 flex-shrink-0"></span>
-                <span className="truncate">{currentUser?.full_name || currentUser?.username || 'National Controller'}</span>
-              </span>
-              <span
-                className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
-                  currentUser?.role === 'superadmin'
-                    ? 'bg-slate-800 text-slate-200 border border-slate-600/50'
-                    : currentUser?.role === 'gov_officer'
-                    ? 'bg-blue-900/80 text-blue-200 border border-blue-600/50'
-                    : 'bg-emerald-900/80 text-emerald-200 border border-emerald-600/50'
-                }`}
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-[#0447AF]/10 text-[#0447AF] font-bold flex items-center justify-center text-xs flex-shrink-0">
+                  {(currentUser?.full_name || currentUser?.username || 'A').charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-xs font-bold text-slate-900 truncate">
+                      {currentUser?.full_name || currentUser?.username || 'National Controller'}
+                    </p>
+                  </div>
+                  <p className="text-[11px] text-slate-500 truncate flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                    <span className="truncate">{assignedStation}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-700 lg:hidden"
+                aria-label="Close sidebar"
               >
-                {currentUser?.role === 'superadmin'
-                  ? 'Superuser'
-                  : currentUser?.role === 'gov_officer'
-                  ? 'Gov Officer'
-                  : 'Checkpoint'}
-              </span>
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <p className="text-[11px] text-slate-400 truncate flex items-center space-x-1">
-              <MapPin className="w-3 h-3 text-slate-500 flex-shrink-0" />
-              <span className="truncate">{assignedStation}</span>
-            </p>
           </div>
 
-          {/* Vertical Grouped Navigation Links */}
-          <nav className="space-y-5" aria-label="Admin Sidebar Navigation">
+          {/* Vertical Navigation Links */}
+          <div className="px-2.5 py-3 overflow-y-auto flex-1 space-y-3">
             {/* GROUP 1: OPERATIONS & PASSES */}
             <div className="space-y-0.5">
-
               <button
                 type="button"
                 onClick={() => {
@@ -881,18 +853,18 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab('overview');
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
                   activeTab === 'overview'
-                    ? 'bg-[#0447AF] text-white shadow-md shadow-[#0447AF]/30'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-blue-50 text-[#0447AF] font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                 }`}
               >
                 <div className="flex items-center space-x-2.5">
-                  <LayoutDashboard className="w-4 h-4 text-blue-300" />
+                  <LayoutDashboard className={`w-4 h-4 ${activeTab === 'overview' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
                   <span>{t('admin.overview')}</span>
                 </div>
                 {pendingCount > 0 && (
-                  <span className="bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded-full text-[10px]">
+                  <span className="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded-full text-[10px]">
                     {pendingCount}
                   </span>
                 )}
@@ -905,17 +877,17 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab('all_passes');
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
                   activeTab === 'all_passes'
-                    ? 'bg-[#0447AF] text-white shadow-md shadow-[#0447AF]/30'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-blue-50 text-[#0447AF] font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                 }`}
               >
                 <div className="flex items-center space-x-2.5">
-                  <FileText className="w-4 h-4 text-sky-300" />
+                  <FileText className={`w-4 h-4 ${activeTab === 'all_passes' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
                   <span>{t('admin.tabAllPasses')}</span>
                 </div>
-                <span className="bg-slate-800 px-2 py-0.5 rounded-full text-[11px] text-slate-300 font-mono">
+                <span className="text-[11px] text-slate-400 font-mono">
                   {applications.length}
                 </span>
               </button>
@@ -927,14 +899,14 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab('coordination');
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
                   activeTab === 'coordination'
-                    ? 'bg-[#0447AF] text-white shadow-md shadow-[#0447AF]/30'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-blue-50 text-[#0447AF] font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                 }`}
               >
                 <div className="flex items-center space-x-2.5">
-                  <Activity className="w-4 h-4 text-rose-400" />
+                  <Activity className={`w-4 h-4 ${activeTab === 'coordination' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
                   <span>{t('admin.coordination')}</span>
                 </div>
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></span>
@@ -946,17 +918,17 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab('verify_pass');
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
                   activeTab === 'verify_pass'
-                    ? 'bg-[#0447AF] text-white shadow-md shadow-[#0447AF]/30'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-blue-50 text-[#0447AF] font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                 }`}
               >
                 <div className="flex items-center space-x-2.5">
-                  <QrCode className="w-4 h-4 text-emerald-400" />
+                  <QrCode className={`w-4 h-4 ${activeTab === 'verify_pass' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
                   <span>{t('admin.tabVerify')}</span>
                 </div>
-                <span className="text-[10px] bg-emerald-950 text-emerald-400 px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded font-mono">
                   LIVE
                 </span>
               </button>
@@ -968,20 +940,19 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab('track_status');
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors ${
                   activeTab === 'track_status'
-                    ? 'bg-[#0447AF] text-white shadow-md shadow-[#0447AF]/30'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-blue-50 text-[#0447AF] font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                 }`}
               >
-                <Search className="w-4 h-4 text-amber-400" />
+                <Search className={`w-4 h-4 ${activeTab === 'track_status' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
                 <span>{t('admin.tabTrack')}</span>
               </button>
             </div>
 
             {/* GROUP 2: INFRASTRUCTURE & STATIONS */}
-            <div className="space-y-0.5 pt-2 border-t border-slate-800/50">
-
+            <div className="space-y-0.5 pt-2.5 border-t border-slate-200/60">
               <button
                 type="button"
                 onClick={() => {
@@ -989,17 +960,17 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab('road_conditions');
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
                   activeTab === 'road_conditions'
-                    ? 'bg-[#0447AF] text-white shadow-md shadow-[#0447AF]/30'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-blue-50 text-[#0447AF] font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                 }`}
               >
                 <div className="flex items-center space-x-2.5">
-                  <Navigation className="w-4 h-4 text-orange-400" />
+                  <Navigation className={`w-4 h-4 ${activeTab === 'road_conditions' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
                   <span>{t('admin.tabRoads')}</span>
                 </div>
-                <span className="text-[10px] bg-red-950 text-red-300 px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[10px] bg-red-50 text-red-700 px-1.5 py-0.5 rounded font-mono">
                   {roads.length}
                 </span>
               </button>
@@ -1011,25 +982,24 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab('checkpoints');
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
                   activeTab === 'checkpoints'
-                    ? 'bg-[#0447AF] text-white shadow-md shadow-[#0447AF]/30'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-blue-50 text-[#0447AF] font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                 }`}
               >
                 <div className="flex items-center space-x-2.5">
-                  <Building className="w-4 h-4 text-blue-300" />
+                  <Building className={`w-4 h-4 ${activeTab === 'checkpoints' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
                   <span>{t('admin.tabCheckpoints')}</span>
                 </div>
-                <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded font-mono">
                   {checkpoints.length}
                 </span>
               </button>
             </div>
 
             {/* GROUP 3: SECURITY & AUDIT */}
-            <div className="space-y-0.5 pt-2 border-t border-slate-800/50">
-
+            <div className="space-y-0.5 pt-2.5 border-t border-slate-200/60">
               {isSuperAdmin && (
                 <button
                   type="button"
@@ -1038,17 +1008,17 @@ export const AdminDashboard: React.FC = () => {
                     setActiveTab('users');
                     setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
                     activeTab === 'users'
-                      ? 'bg-[#0447AF] text-white shadow-sm'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      ? 'bg-blue-50 text-[#0447AF] font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                   }`}
                 >
                   <div className="flex items-center space-x-2.5">
-                    <Users className="w-4 h-4 text-sky-400" />
+                    <Users className={`w-4 h-4 ${activeTab === 'users' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
                     <span>{t('admin.tabUsers')}</span>
                   </div>
-                  <span className="text-[10px] bg-slate-950 text-slate-300 px-1.5 py-0.5 rounded font-mono">
+                  <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded font-mono">
                     {usersList.length}
                   </span>
                 </button>
@@ -1061,62 +1031,49 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab('audit_logs');
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
                   activeTab === 'audit_logs'
-                    ? 'bg-[#0447AF] text-white shadow-md shadow-[#0447AF]/30'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-blue-50 text-[#0447AF] font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
                 }`}
               >
                 <div className="flex items-center space-x-2.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <ShieldCheck className={`w-4 h-4 ${activeTab === 'audit_logs' ? 'text-[#0447AF]' : 'text-slate-400'}`} />
                   <span>{t('admin.auditLogs')}</span>
                 </div>
-                <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded font-mono">
                   {auditLogs.length}
                 </span>
               </button>
             </div>
-          </nav>
+          </div>
         </div>
 
         {/* Sidebar Footer & Actions */}
-        <div className="p-4 bg-slate-950 border-t border-slate-800/60 space-y-2 flex-shrink-0">
-          {isSuperAdmin && (
-            <button
-              type="button"
-              onClick={() => setShowAddUserModal(true)}
-              className="w-full flex items-center justify-center space-x-2 bg-[#0447AF] hover:bg-[#033685] text-white py-2 px-3 rounded-lg text-xs font-bold shadow-sm transition-colors"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>{t('admin.addMember')}</span>
-            </button>
-          )}
+        <div className="p-3 bg-white/70 border-t border-slate-200/70 flex-shrink-0 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => {
+              fetchApplicationsData();
+              fetchCoordinationData();
+              fetchCheckpointsData();
+              fetchRoadsData();
+              fetchAuditLogsData();
+            }}
+            className="inline-flex items-center space-x-1.5 text-slate-500 hover:text-slate-900 text-xs font-medium transition-colors"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading || cpLoading || usersLoading || roadsLoading || coordLoading || auditLoading ? 'animate-spin text-[#0447AF]' : ''}`} />
+            <span>{t('admin.refresh')}</span>
+          </button>
 
-          <div className="flex items-center justify-between pt-1">
-            <button
-              type="button"
-              onClick={() => {
-                fetchApplicationsData();
-                fetchCoordinationData();
-                fetchCheckpointsData();
-                fetchRoadsData();
-                fetchAuditLogsData();
-              }}
-              className="inline-flex items-center space-x-1.5 text-slate-400 hover:text-white text-xs font-semibold"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading || cpLoading || usersLoading || roadsLoading || coordLoading || auditLoading ? 'animate-spin text-blue-400' : ''}`} />
-              <span>{t('admin.refresh')}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex items-center space-x-1 text-red-400 hover:text-red-300 text-xs font-bold"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>{t('admin.logout')}</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="inline-flex items-center space-x-1 text-slate-500 hover:text-[#CC1424] text-xs font-medium transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>{t('admin.logout')}</span>
+          </button>
         </div>
       </aside>
 
@@ -1124,25 +1081,26 @@ export const AdminDashboard: React.FC = () => {
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black/60 z-30 lg:hidden"
+          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
         />
       )}
 
       {/* 2. MAIN ADMIN CONTENT WORKSPACE */}
-      <main className="flex-1 flex flex-col bg-[#F4F8FF] min-w-0 overflow-hidden">
+      <main className="flex-1 flex flex-col bg-[#F8FAFC] min-w-0 overflow-hidden">
         {/* Top Command Bar */}
-        <header className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between flex-shrink-0 relative">
+        <header className="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-3">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100"
+              aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
 
             <div className="flex items-center text-xs">
-              <span className="font-semibold text-[#0447AF] capitalize">
+              <span className="font-bold text-slate-900 text-sm capitalize">
                 {activeTab === 'overview'
                   ? t('admin.overview')
                   : activeTab === 'all_passes'
@@ -1166,20 +1124,20 @@ export const AdminDashboard: React.FC = () => {
 
           <div className="flex items-center space-x-3">
             {/* Live Disaster Clock */}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-white">
-              <Clock className="w-3 h-3 text-[#CC1424]" />
-              <span className="tabular-nums">{currentTime || 'NPT'}</span>
-              <span className="text-[9px] text-slate-400 font-sans font-semibold tracking-wide">NPT</span>
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-medium text-slate-700">
+              <Clock className="w-3.5 h-3.5 text-[#CC1424]" />
+              <span className="tabular-nums font-semibold">{currentTime || 'NPT'}</span>
+              <span className="text-[10px] text-slate-400 font-sans font-medium">NPT</span>
             </div>
 
             {/* Quick Export Manifest Button */}
             <button
               type="button"
               onClick={handleExportCSV}
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0447AF] hover:bg-[#033685] text-white border border-[#0447AF] rounded-lg text-xs font-bold transition-colors shadow-sm"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs transition-colors"
               title="Download CSV Manifest"
             >
-              <Download className="w-3.5 h-3.5 text-white" />
+              <Download className="w-3.5 h-3.5 text-slate-500" />
               <span>Export CSV</span>
             </button>
           </div>
@@ -1584,13 +1542,14 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'coordination' && (
             <div className="space-y-6">
               {/* Header */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4">
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
                 <div className="space-y-1">
-                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-red-950 text-red-400 border border-red-800 text-[11px] font-bold uppercase">
-                    <Activity className="w-3.5 h-3.5 text-red-500 animate-pulse" /> Real-Time Relief Fleet Matrix
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-[11px] font-semibold">
+                    <Activity className="w-3.5 h-3.5 text-red-600" />
+                    <span>Real-Time Fleet Matrix</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-white">Emergency Fleet Coordination Matrix</h2>
-                  <p className="text-xs text-slate-400">
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900">Emergency Fleet Coordination</h2>
+                  <p className="text-xs text-slate-500">
                     High-level operational visibility: relief trip bottlenecks, duplicate vehicle detection, and destination flows.
                   </p>
                 </div>
@@ -1599,35 +1558,35 @@ export const AdminDashboard: React.FC = () => {
                   type="button"
                   onClick={fetchCoordinationData}
                   disabled={coordLoading}
-                  className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-700 transition-colors"
+                  className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-200 transition-colors shadow-2xs"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${coordLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 ${coordLoading ? 'animate-spin text-[#0447AF]' : ''}`} />
                   <span>Refresh Matrix</span>
                 </button>
               </div>
 
               {/* Duplicate Alerts */}
               {coordinationData?.duplicateAlerts && coordinationData.duplicateAlerts.length > 0 && (
-                <div className="bg-amber-950/40 border border-amber-800/80 rounded-2xl p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
-                    <AlertTriangle className="w-5 h-5 text-amber-400" />
-                    <span>Duplicate Movement & Multi-Pass Alerts ({coordinationData.duplicateAlerts.length} Vehicles Flagged)</span>
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3 shadow-2xs">
+                  <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
+                    <AlertTriangle className="w-5 h-5 text-amber-600" />
+                    <span>Duplicate Movement Alerts ({coordinationData.duplicateAlerts.length} Vehicles Flagged)</span>
                   </div>
-                  <p className="text-xs text-slate-300">
+                  <p className="text-xs text-amber-800">
                     The following vehicles or organizations have multiple active movement requests:
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
                     {coordinationData.duplicateAlerts.map((item: any) => (
-                      <div key={item.vehicle_number} className="bg-slate-900 border border-slate-800 p-4 rounded-xl text-xs space-y-1">
+                      <div key={item.vehicle_number} className="bg-white border border-amber-200 p-4 rounded-xl text-xs space-y-1 shadow-2xs">
                         <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-amber-300">{item.vehicle_number}</span>
-                          <span className="bg-amber-950 text-amber-300 text-[10px] px-2 py-0.5 rounded font-bold border border-amber-800">
+                          <span className="font-mono font-bold text-slate-900">{item.vehicle_number}</span>
+                          <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">
                             {item.request_count} Requests
                           </span>
                         </div>
-                        <p className="text-slate-300 font-semibold">{item.org_name}</p>
-                        <p className="text-slate-400 text-[11px]">Destinations: {item.destinations}</p>
+                        <p className="text-slate-800 font-semibold">{item.org_name}</p>
+                        <p className="text-slate-500 text-[11px]">Destinations: {item.destinations}</p>
                       </div>
                     ))}
                   </div>
@@ -2190,15 +2149,15 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'audit_logs' && (
             <div className="space-y-5">
               {/* Header & Filter Toolbar */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-2xs">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                      <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-emerald-600" />
                       <span>{t('admin.auditLogs')}</span>
                     </h2>
-                    <p className="text-xs text-slate-400">
-                      अपरिवर्तनीय प्रशासनिक अडिट लग तथा सुरक्षा गतिविधि विवरण
+                    <p className="text-xs text-slate-500">
+                      Immutable administrative audit trail and security activity logs
                     </p>
                   </div>
 
@@ -2206,34 +2165,34 @@ export const AdminDashboard: React.FC = () => {
                     type="button"
                     onClick={fetchAuditLogsData}
                     disabled={auditLoading}
-                    className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 transition-colors"
+                    className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 transition-colors shadow-2xs"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${auditLoading ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`w-3.5 h-3.5 ${auditLoading ? 'animate-spin text-[#0447AF]' : ''}`} />
                     <span>Refresh Logs</span>
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-100">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Search Audit Trail</label>
+                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Search Audit Trail</label>
                     <input
                       type="text"
                       value={auditSearchQuery}
                       onChange={(e) => setAuditSearchQuery(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && fetchAuditLogsData()}
                       placeholder="Action, Entity ID, Actor..."
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-white focus:border-[#0447AF]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-900 text-xs focus:border-[#0447AF] focus:bg-white outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Filter by Entity</label>
+                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filter by Entity</label>
                     <select
                       value={auditEntityFilter}
                       onChange={(e) => {
                         setAuditEntityFilter(e.target.value);
                       }}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-white focus:border-[#0447AF]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-900 text-xs focus:border-[#0447AF] focus:bg-white outline-none"
                     >
                       <option value="">All Entity Types</option>
                       <option value="application">Applications</option>
