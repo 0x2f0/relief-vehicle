@@ -35,7 +35,7 @@ export function Navbar() {
                 <span className="text-[10px] uppercase font-bold tracking-wider text-red-400">DISASTER RELIEF</span>
               </div>
               <h1 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-1.5">
-                Nepal Disaster Relief Vehicle E-Pass
+                Disaster Relief Vehicle E-Pass
               </h1>
             </div>
           </Link>

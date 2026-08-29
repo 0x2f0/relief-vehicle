@@ -267,10 +267,10 @@ export const ApplyPass = () => {
                   value={formData.applicant_name}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderName')}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.applicant_name
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.applicant_name && (
@@ -288,14 +288,16 @@ export const ApplyPass = () => {
                 <input
                   required
                   type="tel"
+                  inputMode="tel"
+                  maxLength={14}
                   name="applicant_phone"
                   value={formData.applicant_phone}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderPhone')}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.applicant_phone
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.applicant_phone && (
@@ -314,14 +316,15 @@ export const ApplyPass = () => {
                 </label>
                 <input
                   type="email"
+                  inputMode="email"
                   name="applicant_email"
                   value={formData.applicant_email}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderEmail')}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.applicant_email
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.applicant_email && (
@@ -338,14 +341,16 @@ export const ApplyPass = () => {
                 </label>
                 <input
                   type="tel"
+                  inputMode="tel"
+                  maxLength={14}
                   name="emergency_contact"
                   value={formData.emergency_contact}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderEmergencyContact')}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.emergency_contact
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.emergency_contact && (
@@ -369,10 +374,10 @@ export const ApplyPass = () => {
                   value={formData.org_name}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderOrg')}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.org_name
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.org_name && (
@@ -391,7 +396,7 @@ export const ApplyPass = () => {
                   name="org_type"
                   value={formData.org_type}
                   onChange={handleChange}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15 bg-white transition-all"
                 >
                   <option value="Rescue Team">{t('apply.orgTypeRescue')}</option>
                   <option value="Medical Team">{t('apply.orgTypeMedical')}</option>
@@ -418,13 +423,14 @@ export const ApplyPass = () => {
                   required
                   type="text"
                   name="vehicle_number"
+                  autoCapitalize="characters"
                   value={formData.vehicle_number}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderVehicleNo')}
-                  className={`w-full border rounded-lg p-2.5 text-sm uppercase font-mono font-bold tracking-wider transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm uppercase font-mono font-bold tracking-wider outline-none transition-all bg-white ${
                     fieldErrors.vehicle_number
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.vehicle_number && (
@@ -443,7 +449,7 @@ export const ApplyPass = () => {
                   name="vehicle_type"
                   value={formData.vehicle_type}
                   onChange={handleChange}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white font-medium"
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15 bg-white font-medium transition-all"
                 >
                   <option value="Motorcycle/Bike">{t('apply.vehicleTypeMotorcycle')}</option>
                   <option value="Scooter">{t('apply.vehicleTypeScooter')}</option>
@@ -472,10 +478,10 @@ export const ApplyPass = () => {
                   value={formData.driver_name}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderDriverName')}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.driver_name
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.driver_name && (
@@ -493,14 +499,16 @@ export const ApplyPass = () => {
                 <input
                   required
                   type="tel"
+                  inputMode="tel"
+                  maxLength={14}
                   name="driver_phone"
                   value={formData.driver_phone}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderDriverPhone')}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.driver_phone
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.driver_phone && (
@@ -524,10 +532,10 @@ export const ApplyPass = () => {
                   name="passenger_count"
                   value={formData.passenger_count}
                   onChange={handleChange}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.passenger_count
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.passenger_count && (
@@ -548,7 +556,7 @@ export const ApplyPass = () => {
                   value={formData.vehicle_capacity}
                   onChange={handleChange}
                   placeholder={t('apply.placeholderCapacity')}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white"
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15 bg-white transition-all"
                 />
               </div>
             </div>
@@ -563,19 +571,18 @@ export const ApplyPass = () => {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {t('apply.from')} <span className="text-[#CC1424]">*</span>
                 </label>
-                <div className={fieldErrors.departure_location ? 'ring-1 ring-red-400 rounded-lg' : ''}>
-                  <LocationCombobox
-                    required
-                    name="departure_location"
-                    value={formData.departure_location}
-                    onChange={(val) => {
-                      setFormData((prev) => ({ ...prev, departure_location: val }));
-                      setFieldErrors((prev) => ({ ...prev, departure_location: '' }));
-                    }}
-                    placeholder={t('apply.placeholderFrom')}
-                    categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
-                  />
-                </div>
+                <LocationCombobox
+                  required
+                  name="departure_location"
+                  value={formData.departure_location}
+                  hasError={Boolean(fieldErrors.departure_location)}
+                  onChange={(val) => {
+                    setFormData((prev) => ({ ...prev, departure_location: val }));
+                    setFieldErrors((prev) => ({ ...prev, departure_location: '' }));
+                  }}
+                  placeholder={t('apply.placeholderFrom')}
+                  categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
+                />
                 {fieldErrors.departure_location && (
                   <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
@@ -588,19 +595,18 @@ export const ApplyPass = () => {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {t('apply.to')} <span className="text-[#CC1424]">*</span>
                 </label>
-                <div className={fieldErrors.destination ? 'ring-1 ring-red-400 rounded-lg' : ''}>
-                  <LocationCombobox
-                    required
-                    name="destination"
-                    value={formData.destination}
-                    onChange={(val) => {
-                      setFormData((prev) => ({ ...prev, destination: val }));
-                      setFieldErrors((prev) => ({ ...prev, destination: '' }));
-                    }}
-                    placeholder={t('apply.placeholderTo')}
-                    categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
-                  />
-                </div>
+                <LocationCombobox
+                  required
+                  name="destination"
+                  value={formData.destination}
+                  hasError={Boolean(fieldErrors.destination)}
+                  onChange={(val) => {
+                    setFormData((prev) => ({ ...prev, destination: val }));
+                    setFieldErrors((prev) => ({ ...prev, destination: '' }));
+                  }}
+                  placeholder={t('apply.placeholderTo')}
+                  categories={['District', 'City / Hub', 'Relief Point', 'Checkpoint']}
+                />
                 {fieldErrors.destination && (
                   <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
@@ -621,10 +627,10 @@ export const ApplyPass = () => {
                   name="departure_time"
                   value={formData.departure_time}
                   onChange={handleChange}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.departure_time
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.departure_time && (
@@ -644,10 +650,10 @@ export const ApplyPass = () => {
                   name="return_time"
                   value={formData.return_time}
                   onChange={handleChange}
-                  className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                  className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                     fieldErrors.return_time
-                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                   }`}
                 />
                 {fieldErrors.return_time && (
@@ -672,7 +678,7 @@ export const ApplyPass = () => {
                 name="cargo_type"
                 value={formData.cargo_type}
                 onChange={handleChange}
-                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white font-medium"
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15 bg-white font-medium transition-all"
               >
                 <option value="Relief Food & Water">{t('apply.cargoTypeFood')}</option>
                 <option value="Dry Rations & Grains">{t('apply.cargoTypeDryRation')}</option>
@@ -700,10 +706,10 @@ export const ApplyPass = () => {
                 value={formData.cargo_details}
                 onChange={handleChange}
                 placeholder={t('apply.placeholderCargoDetails')}
-                className={`w-full border rounded-lg p-2.5 text-sm transition-colors bg-white ${
+                className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all bg-white ${
                   fieldErrors.cargo_details
-                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-200'
-                    : 'border-slate-300 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                    ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                    : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
                 }`}
               />
               {fieldErrors.cargo_details && (

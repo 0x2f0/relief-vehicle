@@ -84,22 +84,48 @@ applications.post('/', async (c) => {
   return c.json({ id, secret_token: secretToken, message: 'Application submitted successfully' }, 201);
 });
 
+function maskPhone(phone: unknown): string {
+  if (!phone) return '';
+  const str = String(phone).trim();
+  if (str.length <= 4) return '****';
+  if (str.length === 10) {
+    return str.slice(0, 3) + '****' + str.slice(-3);
+  }
+  return str.slice(0, Math.min(3, Math.floor(str.length / 2))) + '****' + str.slice(-2);
+}
+
+function maskEmail(email: unknown): string {
+  if (!email) return '';
+  const str = String(email).trim();
+  const parts = str.split('@');
+  if (parts.length !== 2) return '***@***';
+  const name = parts[0];
+  const domain = parts[1];
+  const maskedName = name.length > 2 ? name.charAt(0) + '***' + name.charAt(name.length - 1) : '***';
+  return `${maskedName}@${domain}`;
+}
+
 applications.get('/:id/track', async (c) => {
   const id = (c.req.param('id') || '').trim();
-  const token = (c.req.query('token') || '').trim();
+  const queryToken = (c.req.query('token') || '').trim();
+  const headerToken = (c.req.header('x-applicant-token') || c.req.header('x-application-token') || '').trim();
+  const authHeader = (c.req.header('Authorization') || '').trim();
+  const clientToken = queryToken || headerToken;
   const db = getDbClient(c.env);
 
   const res = await db.execute({
-    sql: `SELECT id, applicant_name, applicant_phone, org_name, org_type,
-          vehicle_number, vehicle_type, driver_name, driver_phone,
-          departure_location, destination, proposed_route, cargo_type,
+    sql: `SELECT id, applicant_name, applicant_phone, applicant_email, org_name, org_type,
+          vehicle_number, vehicle_type, driver_name, driver_phone, emergency_contact,
+          passenger_count, vehicle_capacity,
+          departure_location, destination, intermediate_checkpoints,
+          departure_time, return_time, proposed_route, cargo_type,
           cargo_details, travel_purpose, priority, status, admin_notes,
           info_request_reason, secret_token, created_at, updated_at
           FROM applications
-          WHERE id = ? OR UPPER(REPLACE(vehicle_number, ' ', '')) = UPPER(REPLACE(?, ' ', ''))
+          WHERE id = ? OR UPPER(REPLACE(vehicle_number, ' ', '')) = UPPER(REPLACE(?, ' ', '')) OR secret_token = ?
           ORDER BY datetime(created_at) DESC
           LIMIT 1`,
-    args: [id, id],
+    args: [id, id, id],
   });
 
   if (res.rows.length === 0) {
@@ -107,25 +133,58 @@ applications.get('/:id/track', async (c) => {
   }
 
   const row = res.rows[0] as Record<string, unknown>;
-  if (token && row.secret_token !== token) {
-    return c.json({ error: 'Application not found or invalid token' }, 404);
+  const appId = String(row.id);
+
+  // Determine if viewer is the creator or an authorized administrator
+  let isAuthorized = false;
+
+  // 1. Check if token matches application secret_token
+  if (clientToken && String(row.secret_token) === clientToken) {
+    isAuthorized = true;
   }
 
-  const appId = String(row.id);
+  // 2. Check if admin token is valid
+  if (!isAuthorized && authHeader.startsWith('Bearer ')) {
+    const bearerToken = authHeader.replace('Bearer ', '').trim();
+    if (bearerToken) {
+      try {
+        const adminCheck = await db.execute({
+          sql: `SELECT id, username, role FROM admin_users WHERE token = ? OR id = ? LIMIT 1`,
+          args: [bearerToken, bearerToken],
+        });
+        if (adminCheck.rows.length > 0) {
+          isAuthorized = true;
+        }
+      } catch {}
+    }
+  }
+
   const passRes = await db.execute({
     sql: `SELECT id, status FROM passes WHERE application_id = ? ORDER BY datetime(created_at) DESC LIMIT 1`,
     args: [appId],
   });
   const pass = passRes.rows[0] as { id?: string; status?: string } | undefined;
 
-  const { secret_token: _ignored, ...publicApp } = row;
+  const { secret_token: _ignored, ...publicFields } = row;
   void _ignored;
+
+  // Mask sensitive information if not the same applicant or admin
+  const sanitizedApp = isAuthorized
+    ? { ...publicFields }
+    : {
+        ...publicFields,
+        applicant_phone: maskPhone(row.applicant_phone),
+        applicant_email: maskEmail(row.applicant_email),
+        driver_phone: maskPhone(row.driver_phone),
+        emergency_contact: maskPhone(row.emergency_contact),
+      };
 
   return c.json({
     application: {
-      ...publicApp,
-      pass_id: pass ? id : null,
+      ...sanitizedApp,
+      pass_id: pass ? appId : null,
       pass_status: pass?.status ?? null,
+      is_owner: isAuthorized,
     },
   });
 });

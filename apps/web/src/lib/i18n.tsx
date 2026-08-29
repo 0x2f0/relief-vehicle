@@ -11,11 +11,11 @@ interface I18nContextType {
 const translations: Record<Locale, Record<string, string>> = {
   ne: {
     // App identity & Header
-    'app.title': 'नेपाल विपद् राहत सवारी ई-पास प्रणाली',
-    'app.subtitle': 'Nepal Disaster Relief Vehicle E-Pass System',
-    'app.dept': 'नेपाल विपद् राहत सवारी ई-पास प्रणाली',
+    'app.title': 'विपद् राहत सवारी ई-पास प्रणाली',
+    'app.subtitle': 'नेपाल आपतकालीन पारवहन समन्वय',
+    'app.dept': 'नेपाल आपतकालीन पारवहन समन्वय',
     'app.description': 'विपद् प्रतिकार्य तथा राहत सामग्री ढुवानी सवारी ई-पास पोर्टल',
-    'nav.brand': 'नेपाल विपद् राहत सवारी ई-पास पोर्टल',
+    'nav.brand': 'विपद् राहत सवारी ई-पास पोर्टल',
 
     // Navigation
     'nav.home': 'गृहपृष्ठ',
@@ -367,11 +367,11 @@ const translations: Record<Locale, Record<string, string>> = {
   },
   en: {
     // App identity & Header
-    'app.title': 'Nepal Disaster Relief Vehicle E-Pass System',
-    'app.subtitle': 'Emergency Transit Coordination',
-    'app.dept': 'Nepal Disaster Relief Vehicle E-Pass System',
+    'app.title': 'Disaster Relief Vehicle E-Pass System',
+    'app.subtitle': 'Nepal Emergency Transit Coordination',
+    'app.dept': 'Nepal Emergency Transit Coordination',
     'app.description': 'Disaster Response Vehicle E-Pass & Route Coordination Portal',
-    'nav.brand': 'Nepal Disaster Relief Vehicle E-Pass Portal',
+    'nav.brand': 'Disaster Relief Vehicle E-Pass Portal',
 
     // Navigation
     'nav.home': 'Home',
@@ -390,7 +390,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'home.notice.text': 'A verified digital E-Pass is mandatory for all relief, rescue, and essential medical transport vehicles operating in disaster-declared zones.',
 
     // Hero Section
-    'home.hero.badge': 'Nepal Disaster Relief Vehicle E-Pass System',
+    'home.hero.badge': 'Nepal Emergency Transit Coordination',
     'home.hero.title': 'Disaster Response Vehicle E-Pass & Transit Coordination',
     'home.hero.subtitle': 'Unified portal to streamline disaster relief transit, rescue missions, and medical supply corridors across affected routes.',
     'home.hero.desc': 'Unified portal to streamline disaster relief transit, rescue missions, and medical supply corridors across affected routes.',
@@ -629,9 +629,9 @@ const translations: Record<Locale, Record<string, string>> = {
     'scanner.cameraError': 'Unable to access camera. Please check permissions or upload an image.',
 
     // Admin Login & Dashboard
-    'admin.dept': 'Nepal Disaster Relief Vehicle E-Pass System',
+    'admin.dept': 'Nepal Emergency Transit Coordination',
     'admin.title': 'Emergency Command & Control Center',
-    'admin.subtitle': 'Nepal Disaster Relief Vehicle E-Pass System | Command Desk',
+    'admin.subtitle': 'Disaster Relief Vehicle E-Pass System | Command Desk',
     'admin.login': 'Duty Administration & Command Portal',
     'admin.subTitle': 'Security Inspection & Relief Coordination Portal',
     'admin.username': 'Username',
@@ -717,9 +717,9 @@ const translations: Record<Locale, Record<string, string>> = {
     'footer.phone1155': '1155',
     'footer.phone100_102': '100 / 102',
     'footer.copyright': 'All Rights Reserved',
-    'footer.powered': 'Nepal Disaster Relief Vehicle E-Pass System',
+    'footer.powered': 'Disaster Relief Vehicle E-Pass System',
     'footer.location': 'Kathmandu, Nepal',
-    'footer.gateway': 'Nepal Disaster Relief Vehicle E-Pass Portal',
+    'footer.gateway': 'Disaster Relief Vehicle E-Pass Portal',
   },
 };
 

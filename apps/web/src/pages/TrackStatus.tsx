@@ -191,7 +191,7 @@ export const TrackStatus = () => {
               placeholder={t('track.placeholder')}
               autoCapitalize="characters"
               autoComplete="off"
-              className="w-full pl-8 pr-3 py-2.5 text-xs font-mono uppercase border border-slate-300 rounded-xl focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white font-bold"
+              className="w-full pl-8 pr-3 py-2.5 text-xs font-mono uppercase border border-slate-300 rounded-xl focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15 bg-white font-bold outline-none transition-all"
             />
           </label>
 

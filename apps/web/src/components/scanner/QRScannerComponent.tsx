@@ -220,7 +220,7 @@ export function QRScannerComponent({ onScanSuccess }: QRScannerProps) {
               value={manualInput}
               onChange={(e) => setManualInput(e.target.value)}
               placeholder="e.g. EP-20260829-XXXX"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
               required
             />
           </div>

@@ -30,7 +30,24 @@ html, body {
   color: #FFFFFF;
 }
 
-:focus-visible {
+/* Form inputs single border and outline reset */
+input,
+textarea,
+select {
+  outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none !important;
+}
+
+button:focus-visible,
+a:focus-visible {
   outline: 2px solid #0447AF;
   outline-offset: 2px;
 }

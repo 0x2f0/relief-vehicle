@@ -83,16 +83,14 @@ export const Home = () => {
               </Link>
             )}
 
-            {hasTrackingAccess && (
-              <Link
-                to="/track"
-                preload="intent"
-                className="inline-flex items-center justify-center space-x-2 bg-white text-[#0447AF] hover:bg-blue-50 font-bold px-6 py-3.5 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] group"
-              >
-                <Search className="w-4 h-4 text-[#0447AF]" />
-                <span>{t('home.hero.trackBtn')}</span>
-              </Link>
-            )}
+            <Link
+              to="/track"
+              preload="intent"
+              className="inline-flex items-center justify-center space-x-2 bg-white text-[#0447AF] hover:bg-blue-50 font-bold px-6 py-3.5 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] group"
+            >
+              <Search className="w-4 h-4 text-[#0447AF]" />
+              <span>{t('home.hero.trackBtn')}</span>
+            </Link>
 
             <Link
               to="/roads"

@@ -214,7 +214,7 @@ export function PassCard({ pass, showPrintButton = true }: PassCardProps) {
         {/* Footer / Authority signature */}
         <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400 print:border-black print:text-black">
           <div>
-            <span className="font-bold block text-slate-300 print:text-black">{pass.issuing_authority || 'Nepal Disaster Relief Vehicle E-Pass Coordination'}</span>
+            <span className="font-bold block text-slate-300 print:text-black">{pass.issuing_authority || 'Nepal Emergency Transit Coordination'}</span>
             <span>Issued by authorized officer: {pass.issued_by}</span>
           </div>
           <div className="text-right font-mono text-[10px]">

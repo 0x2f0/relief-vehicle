@@ -135,7 +135,7 @@ export const AdminLogin = () => {
 
         {/* Footer */}
         <p className="text-center text-[10px] text-slate-400 mt-5 font-medium">
-          Nepal Disaster Relief Vehicle E-Pass System
+          Disaster Relief Vehicle E-Pass System
         </p>
       </div>
     </div>

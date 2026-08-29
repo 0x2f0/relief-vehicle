@@ -13,6 +13,7 @@ interface LocationComboboxProps {
   id?: string;
   disabled?: boolean;
   isMultiComma?: boolean;
+  hasError?: boolean;
 }
 
 export const LocationCombobox: React.FC<LocationComboboxProps> = ({
@@ -26,6 +27,7 @@ export const LocationCombobox: React.FC<LocationComboboxProps> = ({
   id,
   disabled = false,
   isMultiComma = false,
+  hasError = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -140,7 +142,11 @@ export const LocationCombobox: React.FC<LocationComboboxProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoComplete="off"
-          className={`w-full pl-9 pr-14 py-2.5 text-sm border border-slate-300 rounded-lg focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF] bg-white transition-shadow outline-none ${className}`}
+          className={`w-full pl-9 pr-14 py-2.5 text-sm border rounded-lg bg-white transition-all outline-none ${
+            hasError
+              ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+              : 'border-slate-300 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15'
+          } ${className}`}
         />
 
         <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 gap-1">

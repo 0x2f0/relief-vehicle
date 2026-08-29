@@ -63,16 +63,35 @@ export async function submitApplication(data: Record<string, any>) {
 }
 
 export async function trackApplication(id: string, token?: string) {
-	const query = token ? `?token=${encodeURIComponent(token)}` : "";
+	let clientToken = token;
+	if (!clientToken && typeof localStorage !== 'undefined') {
+		clientToken = localStorage.getItem(`token_${id}`) || undefined;
+	}
+	const query = clientToken ? `?token=${encodeURIComponent(clientToken)}` : "";
+	const headers: Record<string, string> = {};
+	if (clientToken) {
+		headers['x-applicant-token'] = clientToken;
+	}
 	const data = await fetchApi<{ application: Application }>(
 		`/applications/${encodeURIComponent(id)}/track${query}`,
+		{ headers },
 	);
 	return data.application;
 }
 
 export async function getPublicPass(id: string) {
+	let clientToken: string | undefined;
+	if (typeof localStorage !== 'undefined') {
+		clientToken = localStorage.getItem(`token_${id}`) || undefined;
+	}
+	const query = clientToken ? `?token=${encodeURIComponent(clientToken)}` : "";
+	const headers: Record<string, string> = {};
+	if (clientToken) {
+		headers['x-applicant-token'] = clientToken;
+	}
 	return fetchApi<{ pass: Pass; application?: Application }>(
-		`/passes/${encodeURIComponent(id)}/public`,
+		`/passes/${encodeURIComponent(id)}/public${query}`,
+		{ headers },
 	);
 }
 

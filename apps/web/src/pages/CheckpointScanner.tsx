@@ -340,7 +340,7 @@ export const CheckpointScanner = () => {
                 className={`w-full text-xs border rounded-md p-2 font-medium transition-colors ${
                   !isSuperAdmin
                     ? 'bg-slate-100/90 text-slate-700 border-slate-200 cursor-not-allowed select-none font-semibold'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15 outline-none'
                 }`}
               >
                 {checkpointsList.map((cp) => (
@@ -425,7 +425,7 @@ export const CheckpointScanner = () => {
                   value={manualToken}
                   onChange={(e) => setManualToken(e.target.value)}
                   placeholder="EP-20260829-XXXX"
-                  className="w-full border border-slate-300 rounded-lg p-3 text-sm font-mono focus:border-[#0447AF] focus:ring-1 focus:ring-[#0447AF]"
+                  className="w-full border border-slate-300 rounded-lg p-3 text-sm font-mono focus:border-[#0447AF] focus:ring-2 focus:ring-[#0447AF]/15 outline-none"
                 />
               </div>
               <button
